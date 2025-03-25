@@ -1,18 +1,120 @@
+
 services:
+  evolution_api_v2:
+    image: atendai/evolution-api:v2.2.0
+    depends_on:
+      - postgres
+    volumes:
+      - evolution_v2_instances:/evolution/instances
+    networks:
+      - local_network
+    environment:
+      # Server Configuration
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_API_KEY=6f452646de12e76ae1625de209d77862
+      
+      # Logging Configuration
+      - LOG_LEVEL=DEBUG
+      - LOG_COLOR=true
+      
+      # Database Configuration
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=evolution2
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=localpassword
+      - DATABASE_CONNECTION_URI=postgresql://postgres:localpassword@postgres:5432/evolution2
+      
+      # RabbitMQ Configuration
+      - RABBITMQ_ENABLED=true
+      - RABBITMQ_URI=amqp://rabbitmq:localpassword@rabbitmq:5672/default
+      
+      # Development Settings
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - OPENAI_ENABLED=false
+      - TYPEBOT_ENABLED=true
+      - CHATWOOT_ENABLED=false
+      
+      # Cache Configuration
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/6
+      
+      # S3 Storage Configuration
+      - S3_ENABLED=true
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET=local-bucket
+      - S3_ENDPOINT=minio
+      - S3_PORT=9000
+      - S3_USE_SSL=false
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+
   n8n:
-    stdin_open: true
-    tty: true
-    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n:latest
     ports:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
-    image: docker.n8n.io/n8nio/n8n
     environment:
-      - N8N_SECURE_COOKIE=false #Disable SSL
-      - GENERIC_TIMEZONE=Europe/Madrid
-      - TZ=Europe/Madrid
+      - N8N_ENCRYPTION_KEY=local_dev_encryption_key
+      - GENERIC_TIMEZONE=America/Mexico_City
+      - N8N_USER=admin
+      - N8N_PASSWORD=local_admin_password
+    networks:
+      - local_network
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - local_network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - local_network
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=localpassword
+      - POSTGRES_MULTIPLE_DATABASES=evolution2,chatwoot,n8n
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sqlpostgres:/docker-entrypoint-initdb.d
+    networks:
+      - local_network
 
 volumes:
+  evolution_v2_instances:
   n8n_data:
-    external: false
+  minio_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  local_network:
+    driver: bridge
