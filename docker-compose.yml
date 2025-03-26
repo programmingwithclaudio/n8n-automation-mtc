@@ -10,7 +10,8 @@ services:
       - local_network
     environment:
       # Server Configuration
-      - SERVER_URL=http://localhost:8080
+      # SERVER_URL=http://localhost:8080
+      - SERVER_URL=http://evolution_api_v2:8080
       - AUTHENTICATION_API_KEY=6f452646de12e76ae1625de209d77862
       
       # Logging Configuration
@@ -32,7 +33,7 @@ services:
       - RABBITMQ_URI=amqp://rabbitmq:localpassword@rabbitmq:5672/default
       
       # Development Settings
-      - WEBHOOK_GLOBAL_ENABLED=false
+      - WEBHOOK_GLOBAL_ENABLED=true
       - OPENAI_ENABLED=false
       - TYPEBOT_ENABLED=true
       - CHATWOOT_ENABLED=false
@@ -68,6 +69,8 @@ services:
       - GENERIC_TIMEZONE=America/Mexico_City
       - N8N_USER=admin
       - N8N_PASSWORD=local_admin_password
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
     networks:
       - local_network
 
