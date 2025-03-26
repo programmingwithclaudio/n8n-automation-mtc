@@ -1,5 +1,7 @@
 ## Proyecto n8n TEST
-
+[![Tema de Colores](https://img.shields.io/badge/theme-gruvbox%20dark-brightgreen)](https://github.com/morhetz/gruvbox)
+[![Estado](https://img.shields.io/badge/estado-stand%20by-yellowgreen)](https://github.com/programmingwithclaudio/dotfiles)
+[![Licencia](https://img.shields.io/badge/licencia-MIT-blue)](https://opensource.org/licenses/MIT)
 
 ```bash
 docker-compose up -d
@@ -35,8 +37,6 @@ chmod +x sqlpostgres/01-init-databases.sh
    Actualmente, el parámetro `SERVER_URL` en Evolution API está configurado como `http://localhost:8080`. Si esta URL se utiliza internamente para construir enlaces o redirigir llamadas, es posible que debas ajustarla para reflejar la red interna o la dirección externa correcta según el flujo de trabajo que estés implementando.
 ---
 
-
-```bash
-docker-compose up -d
-chmod +x sqlpostgres/01-init-databases.sh
-```
+#### Proyecto n8n TEST
+[![bot-ia-n8n.png](https://i.postimg.cc/T1bSgmRR/bot-ia-n8n.png)](https://postimg.cc/hQSpqXzw)
+- Flujo de nodos e intrucciones.

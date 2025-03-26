@@ -1,4 +1,5 @@
 nodo 1 edit file=
+```bash
 {
   "message_id": "{{$json.body.data.key.id}}",
   "recipient": {
@@ -30,9 +31,9 @@ nodo 1 edit file=
   }
 }
 
-
+```
 nodo 2 agente ia =
-
+```bash
 {
   "base": "El usuario {{ $json.sender.name }} ({{ $json.recipient.full_jid }}) dice: '{{ $json.message.content }}'.",
   "contextInstructions": [
@@ -40,12 +41,14 @@ nodo 2 agente ia =
     "Proporciona solo la respuesta final en formato de texto sin etiquetas."
   ]
 }
-
+```
 
 nodo 3 simple memory=
+```bash
 {{ $json.context.session_id }}
-
+```
 nodo 4 http request =
+```bash
 url = http://evolution_api_v2:8080/message/sendText/{{$node['Edit Fields'].json.instance.name}}
 
 Send Headers =>
@@ -58,3 +61,4 @@ number = {{ $('Edit Fields').item.json.recipient.phone }}
 
 text = {{$node['AI Agent'].json.output}}
 
+```
