@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-
 # Crear múltiples bases de datos
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE evolution2;
@@ -11,7 +10,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     GRANT ALL PRIVILEGES ON DATABASE chatwoot TO "$POSTGRES_USER";
     GRANT ALL PRIVILEGES ON DATABASE n8n TO "$POSTGRES_USER";
 EOSQL
-
 # Script opcional para configuraciones adicionales
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d evolution2 <<-EOSQL
     -- Crear esquemas o usuarios adicionales si es necesario
