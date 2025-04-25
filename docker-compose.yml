@@ -10,8 +10,8 @@ services:
       - local_network
     environment:
       # Server Configuration
-      # SERVER_URL=http://localhost:8080
-      - SERVER_URL=http://evolution_api_v2:8080
+      - SERVER_URL=http://localhost:8080
+      #- SERVER_URL=http://evolution_api_v2:8080
       - AUTHENTICATION_API_KEY=6f452646de12e76ae1625de209d77862
       
       # Logging Configuration
@@ -58,21 +58,21 @@ services:
           cpus: '1'
           memory: 1024M
 
-  n8n:
-    image: docker.n8n.io/n8nio/n8n:latest
-    ports:
-      - "5678:5678"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    environment:
-      - N8N_ENCRYPTION_KEY=local_dev_encryption_key
-      - GENERIC_TIMEZONE=America/Mexico_City
-      - N8N_USER=admin
-      - N8N_PASSWORD=local_admin_password
-      - N8N_RUNNERS_ENABLED=true
-      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-    networks:
-      - local_network
+  # n8n:
+  #   image: docker.n8n.io/n8nio/n8n:latest
+  #   ports:
+  #     - "5678:5678"
+  #   volumes:
+  #     - n8n_data:/home/node/.n8n
+  #   environment:
+  #     - N8N_ENCRYPTION_KEY=local_dev_encryption_key
+  #     - GENERIC_TIMEZONE=America/Mexico_City
+  #     - N8N_USER=admin
+  #     - N8N_PASSWORD=local_admin_password
+  #     - N8N_RUNNERS_ENABLED=true
+  #     - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+  #   networks:
+  #     - local_network
 
   minio:
     image: minio/minio:latest
@@ -113,7 +113,7 @@ services:
 
 volumes:
   evolution_v2_instances:
-  n8n_data:
+  # n8n_data:
   minio_data:
   postgres_data:
   redis_data:
