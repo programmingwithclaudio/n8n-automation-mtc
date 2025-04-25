@@ -40,3 +40,13 @@ chmod +x sqlpostgres/01-init-databases.sh
 #### Proyecto n8n TEST
 [![bot-ia-n8n.png](https://i.postimg.cc/T1bSgmRR/bot-ia-n8n.png)](https://postimg.cc/hQSpqXzw)
 - Flujo de nodos e intrucciones.
+
+
+{
+  "base": "El usuario {{ $('Edit Fields').item.json.sender.name }} {{ $('Edit Fields').item.json.recipient.full_jid }} dice: '{{ $('Edit Fields').item.json.message.content }}'."
+  "contextInstructions": [
+    "Responde de forma directa, cordial y profesional sin incluir encabezados ni indicaciones de generación automática.",
+    "Proporciona solo la respuesta final en formato de texto sin etiquetas."
+  ]
+}
+
