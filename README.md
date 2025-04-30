@@ -41,7 +41,7 @@ chmod +x sqlpostgres/01-init-databases.sh
 [![bot-ia-n8n.png](https://i.postimg.cc/T1bSgmRR/bot-ia-n8n.png)](https://postimg.cc/hQSpqXzw)
 - Flujo de nodos e intrucciones.
 
-
+```bash
 {
   "base": "El usuario {{ $('Edit Fields').item.json.sender.name }} {{ $('Edit Fields').item.json.recipient.full_jid }} dice: '{{ $('Edit Fields').item.json.message.content }}'."
   "contextInstructions": [
@@ -49,4 +49,4 @@ chmod +x sqlpostgres/01-init-databases.sh
     "Proporciona solo la respuesta final en formato de texto sin etiquetas."
   ]
 }
-
+```

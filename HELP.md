@@ -74,3 +74,12 @@ De esa forma, **cuando Evolution haga un POST a `$WEBHOOK_URL`**, lo enviará ex
 3. Actívalo y prueba de nuevo desde tu contenedor o CMD según corresponda.
 
 Con eso ya no tendrás `getaddrinfo ENOTFOUND` ni errores de sintaxis en `curl`. ¡Éxitos!
+
+```bash
+pip install "fastapi[standard]"
+
+pip install aiohttp
+pip install requests
+nvm install v18.17.0
+```
+# https://www.youtube.com/watch?v=3KVqlIF0zZw&t=506s

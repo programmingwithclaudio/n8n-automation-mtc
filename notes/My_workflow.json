@@ -1,0 +1,210 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent_ia_dev",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "13e87a24-c860-411c-a05e-20e42f50c5fd",
+      "name": "Webhook",
+      "webhookId": "2a3211f7-bbf5-4d1d-874c-62647f444dfe"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca7997d0-d009-4a43-9f3c-1b115bf4001c",
+              "leftValue": "={{ $json.data.key.remoteJid}}\n",
+              "rightValue": "={{ \"51904875166@s.whatsapp.net\"}}",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "f9a26258-3cf9-44bb-9d3f-5e66526847c9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"message_id\": \"{{$json.body.data.key.id}}\",\n  \"recipient\": {\n    \"phone\": \"{{$json.body.data.key.remoteJid.split('@')[0]}}\",\n    \"full_jid\": \"{{$json.body.data.key.remoteJid}}\"\n  },\n  \"sender\": {\n    \"phone\": \"{{$json.body.sender.split('@')[0]}}\",\n    \"name\": \"{{$json.body.data.pushName}}\",\n    \"device\": \"{{$json.body.data.source}}\"\n  },\n  \"message\": {\n    \"content\": \"{{$json.body.data.message.conversation || ''}}\",\n    \"type\": \"{{$json.body.data.messageType}}\",\n    \"timestamp\": \"{{$json.body.data.messageTimestamp}}\",\n    \"hasMedia\": \"{{!!$json.body.data.message.audioMessage || !!$json.body.data.message.videoMessage || !!$json.body.data.message.imageMessage}}\",\n    \"mediaType\": \"{{$json.body.data.message.audioMessage ? 'audio' : $json.body.data.message.videoMessage ? 'video' : $json.body.data.message.imageMessage ? 'image' : 'none'}}\",\n    \"mediaUrl\": \"{{$json.body.data.message.audioMessage ? $json.body.data.message.audioMessage.url : $json.body.data.message.videoMessage ? $json.body.data.message.videoMessage.url : $json.body.data.message.imageMessage ? $json.body.data.message.imageMessage.url : ''}}\",\n    \"security\": {\n      \"encryption\": \"{{$json.body.data.message.messageContextInfo.deviceListMetadata.senderAccountType}}\",\n      \"secret\": \"{{$json.body.data.message.messageContextInfo.messageSecret}}\"\n    }\n  },\n  \"instance\": {\n    \"name\": \"{{$json.body.instance}}\",\n    \"server\": \"{{$json.body.server_url}}\",\n    \"api_key\": \"{{$json.body.apikey}}\"\n  },\n  \"context\": {\n    \"session_id\": \"{{$json.body.data.key.id}}_{{$json.body.data.messageTimestamp}}\",\n    \"origin\": \"{{$json.body.data.source}}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "10397605-9769-4c75-94b4-9e32f627c6a6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/human_query",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "human_query",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -100
+      ],
+      "id": "403984b3-c5e7-4f47-8d54-2c6eae8d4f91",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f70e29ee-30b8-4159-b880-f7b9bb993324",
+              "name": "data",
+              "value": "={{ $json.data }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -100
+      ],
+      "id": "e1fad38c-898b-4909-aecb-07eb0145defc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"base\": \"El usuario {{ $('Edit Fields').item.json.sender.name }} ({{ $('Edit Fields').item.json.recipient.full_jid }}) dice: '{{ $('Edit Fields').item.json.message.content }}'.\",\n  \"contextInstructions\": [\n    \"Responde de forma directa, cordial y profesional sin incluir encabezados ni indicaciones de generación automática.\",\n    \"Proporciona solo la respuesta final en formato de texto sin etiquetas.\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1100,
+        -100
+      ],
+      "id": "073eed29-5ca2-4887-a728-e8a9867e3456",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "92cbdcf6-e028-433f-953a-1535c901aac3",
+  "meta": {
+    "instanceId": "7dd207af512fbeab3b8e8051a5192587aba24e0aba6b1e661e95117c6930ee5e"
+  },
+  "id": "URv35RouM24fyC8H",
+  "tags": []
+}
