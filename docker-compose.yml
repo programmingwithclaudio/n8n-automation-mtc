@@ -111,12 +111,30 @@ services:
     networks:
       - local_network
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - local_network
+
+
 volumes:
   evolution_v2_instances:
   # n8n_data:
   minio_data:
   postgres_data:
   redis_data:
+  pgadmin_data:
+
 
 networks:
   local_network:

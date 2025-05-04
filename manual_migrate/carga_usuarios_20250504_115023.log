@@ -1,0 +1,8 @@
+2025-05-04 11:50:23,793 - INFO - Iniciando proceso de carga incremental
+2025-05-04 11:50:23,884 - INFO - Conexión exitosa a PostgreSQL
+2025-05-04 11:50:24,189 - INFO - DataFrame cargado: 359 filas con 19 columnas
+2025-05-04 11:50:24,210 - INFO - Tabla usuarios configurada para soporte incremental
+2025-05-04 11:50:24,225 - INFO - Preprocesamiento completado. 359 registros preparados.
+2025-05-04 11:50:24,255 - INFO - No existen registros para la fecha 2025-05-04
+2025-05-04 11:50:24,257 - INFO - No hay registros existentes para 2025-05-04. Insertando todos como nuevos.
+2025-05-04 11:50:24,359 - INFO - Proceso completado exitosamente

@@ -7,11 +7,11 @@ import sys
 from sqlalchemy import create_engine, text, inspect
 import traceback
 
-# Logging configuration
+# Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='data_load.log',
+    filename= r'manual_migrate\carga_actividades.log',
     filemode='a'
 )
 console = logging.StreamHandler(sys.stdout)
@@ -20,17 +20,18 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
-# Database connection configuration
-servidor = "localhost"
-db = "postgres"
-user = "postgres"
-password = "localpassword"
-file_path = r"C:\Users\oak\Downloads\Actividad.xlsx"
-#file_path = r"C:\Users\jimmy.atao\Downloads\Actividad.xlsx"
+# Configuración de conexión a la base de datos
+DB_CONFIG = {
+    "servidor": "localhost",
+    "db": "testdbauren",
+    "user": "postgres",
+    "password": "localpassword"
+}
+FILE_PATH = r"C:\Users\oak\Downloads\Actividad.xlsx"
 
-def verify_con(host, db, user, password):
-    """Verifies database connection"""
-    connection_string = f"postgresql+psycopg2://{user}:{password}@{host}/{db}"
+def verify_connection(config):
+    """Verifica la conexión a la base de datos"""
+    connection_string = f"postgresql+psycopg2://{config['user']}:{config['password']}@{config['servidor']}/{config['db']}"
     try:
         engine = create_engine(connection_string)
         with engine.connect() as conn:
@@ -41,37 +42,36 @@ def verify_con(host, db, user, password):
         return None
 
 def create_hash_id(row):
-    """Creates a consistent hash ID based on key fields"""
+    """Crea un hash ID consistente basado en campos clave"""
     key_fields = ['fecha', 'dni_vendedor', 'actividad', 'detalle', 'latitud', 'longitud']
     key_values = []
     
     for field in key_fields:
         if field in row and pd.notna(row[field]):
-            # Special handling for numeric fields
+            # Manejo especial para campos numéricos
             if field in ['latitud', 'longitud']:
-                # Round to 6 decimals and format to avoid scientific notation
                 val = round(float(row[field]), 6)
                 key_values.append(f"{val:.6f}")
-            # Handling text fields
+            # Manejo de campos de texto
             elif field in ['actividad', 'detalle']:
                 key_values.append(str(row[field]).strip().upper())
-            # Date fields
+            # Campos de fecha
             elif field == 'fecha' and isinstance(row[field], (datetime, pd.Timestamp)):
                 key_values.append(row[field].strftime('%Y-%m-%d %H:%M:%S'))
             else:
                 key_values.append(str(row[field]).strip())
         else:
-            # Consistent value for empty/null fields
+            # Valor consistente para campos vacíos/nulos
             key_values.append('NULL')
     
     key_str = '|'.join(key_values)
     return hashlib.md5(key_str.encode()).hexdigest()
 
 def setup_database(engine):
-    """Sets up database and creates tables if they don't exist"""
+    """Configura la base de datos y crea tablas si no existen"""
     try:
         with engine.connect() as conn:
-            # Main table for activities
+            # Tabla principal para actividades
             conn.execute(text('''
             CREATE TABLE IF NOT EXISTS actividades (
                 id SERIAL PRIMARY KEY,
@@ -87,35 +87,23 @@ def setup_database(engine):
                 latitud DECIMAL(18,8),
                 longitud DECIMAL(18,8),
                 zona VARCHAR(35),
+                estado_carga VARCHAR(20) DEFAULT 'nuevo',
                 fecha_carga TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 hash_id VARCHAR(32),
                 fecha_actualizacion TIMESTAMP
             );
             '''))
 
-            # Create index for fast search by hash_id
+            # Crear índice para búsqueda rápida por hash_id
             conn.execute(text('''
             CREATE INDEX IF NOT EXISTS idx_actividades_hash_id
             ON actividades (hash_id);
             '''))
 
-            # Create index for search by dni_vendedor
+            # Crear índice para búsqueda por dni_vendedor
             conn.execute(text('''
             CREATE INDEX IF NOT EXISTS idx_actividades_dni
             ON actividades (dni_vendedor);
-            '''))
-
-            # History table for change tracking
-            conn.execute(text('''
-            CREATE TABLE IF NOT EXISTS actividades_historial (
-                id SERIAL PRIMARY KEY,
-                actividad_id INTEGER,
-                campo_modificado VARCHAR(50),
-                valor_anterior TEXT,
-                valor_nuevo TEXT,
-                fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                usuario_modificacion VARCHAR(50)
-            );
             '''))
             
             conn.commit()
@@ -126,7 +114,7 @@ def setup_database(engine):
         return False
 
 def parse_date(date_val):
-    """Converts dates from Pandas Timestamp or DD/MM/YYYY HH:MM format to datetime"""
+    """Convierte fechas desde Pandas Timestamp o formato DD/MM/YYYY HH:MM a datetime"""
     if pd.isna(date_val):
         return None
     if isinstance(date_val, pd.Timestamp):
@@ -143,7 +131,7 @@ def parse_date(date_val):
     return None
 
 def load_excel_data(filepath):
-    """Loads data with specific dtype to avoid incorrect conversions"""
+    """Carga datos con dtype específico para evitar conversiones incorrectas"""
     dtype = {
         'dni_vendedor': str,
         'motivo': str,
@@ -152,7 +140,7 @@ def load_excel_data(filepath):
     
     try:
         df = pd.read_excel(filepath, dtype=dtype)
-        # Clean spaces in strings
+        # Limpiar espacios en strings
         for col in df.select_dtypes(include='object').columns:
             df[col] = df[col].astype(str).str.strip()
             df[col] = df[col].replace('nan', None)
@@ -164,8 +152,8 @@ def load_excel_data(filepath):
         return None
 
 def preprocess_data(df):
-    """Preprocesses data for normalization"""
-    # Print original column names for debugging
+    """Preprocesa datos para normalización"""
+    # Imprimir nombres de columnas originales para depuración
     logging.info(f"Columnas originales del Excel: {list(df.columns)}")
     
     column_mapping = {
@@ -183,7 +171,7 @@ def preprocess_data(df):
         'Zona': 'zona'
     }
     
-    # Check if columns exist before renaming
+    # Verificar si existen las columnas antes de renombrar
     for col, new_col in column_mapping.items():
         if col in df.columns:
             df = df.rename(columns={col: new_col})
@@ -192,11 +180,11 @@ def preprocess_data(df):
     
     logging.info(f"Columnas después de renombrar: {list(df.columns)}")
     
-    # Parse and convert date fields
+    # Parsear y convertir campos de fecha
     if 'fecha' in df.columns:
         df['fecha'] = df['fecha'].apply(parse_date)
     
-    # Normalize text fields
+    # Normalizar campos de texto
     text_columns = ['nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 
                     'motivo', 'zonas_asignadas', 'alertas', 'zona']
     for col in text_columns:
@@ -204,31 +192,31 @@ def preprocess_data(df):
             df[col] = df[col].astype(str).str.strip()
             df[col] = df[col].replace('nan', None)
     
-    # Standardize text case for key fields
+    # Estandarizar case de texto para campos clave
     for col in ['actividad', 'detalle']:
         if col in df.columns:
             df[col] = df[col].str.upper()
     
-    # Handle numeric fields
+    # Manejar campos numéricos
     for col in ['latitud', 'longitud']:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
             df[col] = df[col].round(6)
     
-    # Create hash ID for each record
+    # Crear hash ID para cada registro
     df['hash_id'] = df.apply(create_hash_id, axis=1)
     
-    # Add timestamps
+    # Añadir timestamps
     now = datetime.now()
     df['fecha_carga'] = now
     df['fecha_actualizacion'] = now
+    df['estado_carga'] = 'nuevo'  # Estado por defecto para nuevos registros
     
     logging.info(f"Preprocesamiento completado. Registros: {len(df)}")
-    logging.info(f"Columnas finales: {list(df.columns)}")
     return df
 
 def get_existing_records(engine):
-    """Gets existing records for duplicate detection and updates"""
+    """Obtiene registros existentes para detección de duplicados y actualizaciones"""
     query = """
     SELECT id, hash_id, fecha, nombre_usuario, dni_vendedor, superior, actividad, 
            detalle, motivo, zonas_asignadas, alertas, latitud, longitud, zona
@@ -243,7 +231,7 @@ def get_existing_records(engine):
         return pd.DataFrame()
 
 def normalize_value_for_comparison(value, column_type):
-    """Normalizes values for consistent comparison"""
+    """Normaliza valores para comparación consistente"""
     if pd.isna(value):
         return None
     
@@ -264,67 +252,69 @@ def normalize_value_for_comparison(value, column_type):
     return value
 
 def values_are_different(old_val, new_val, column_type):
-    """Checks if two values are different, handling type conversion"""
+    """Comprueba si dos valores son diferentes, manejando la conversión de tipos"""
     old_normalized = normalize_value_for_comparison(old_val, column_type)
     new_normalized = normalize_value_for_comparison(new_val, column_type)
     
-    # Handle None/NULL values
+    # Manejar valores None/NULL
     if old_normalized is None and new_normalized is None:
         return False
     if old_normalized is None or new_normalized is None:
         return True
     
-    # Special case for dates
+    # Caso especial para fechas
     if column_type == 'date' and isinstance(old_normalized, datetime) and isinstance(new_normalized, datetime):
         return old_normalized.strftime('%Y-%m-%d %H:%M:%S') != new_normalized.strftime('%Y-%m-%d %H:%M:%S')
     
     return old_normalized != new_normalized
 
 def incremental_load_and_update(df, engine):
-    """Performs incremental data loading by identifying new records and updates"""
+    """Realiza la carga incremental de datos identificando registros nuevos y actualizaciones"""
     try:
         existing_records = get_existing_records(engine)
         
         if existing_records.empty:
-            # If no existing records, insert all as new
+            # Si no hay registros existentes, insertar todos como nuevos
             logging.info("No hay registros existentes. Insertando todos como nuevos.")
             required_cols = ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 
                            'actividad', 'detalle', 'motivo', 'zonas_asignadas', 
                            'alertas', 'latitud', 'longitud', 'zona', 
-                           'hash_id', 'fecha_carga', 'fecha_actualizacion']
+                           'hash_id', 'fecha_carga', 'fecha_actualizacion', 'estado_carga']
             
-            # Ensure all required columns exist
+            # Asegurar que existan todas las columnas requeridas
             for col in required_cols:
                 if col not in df.columns:
                     if col in ['fecha_carga', 'fecha_actualizacion']:
                         df[col] = datetime.now()
+                    elif col == 'estado_carga':
+                        df[col] = 'nuevo'
                     else:
                         df[col] = None
             
-            # Insert all records
+            # Insertar todos los registros
             insert_df = df[required_cols]
             insert_df.to_sql('actividades', engine, if_exists='append', 
                           index=False, chunksize=500, method='multi')
             return len(df), 0
         
-        # Create hash map for quick lookup
+        # Crear mapa de hash para búsqueda rápida
         existing_hash_map = dict(zip(existing_records['hash_id'], existing_records['id']))
         existing_hash_set = set(existing_records['hash_id'])
         
-        # Identify new records
+        # Identificar registros nuevos
         df['is_new'] = ~df['hash_id'].isin(existing_hash_set)
         new_records_df = df[df['is_new']]
         
-        # Identify existing records that might need updates
+        # Identificar registros existentes que podrían necesitar actualizaciones
         existing_records_df = df[~df['is_new']].copy()
         
-        # Insert new records
+        # Insertar registros nuevos
         inserted_count = 0
         if not new_records_df.empty:
             required_cols = ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 
                            'actividad', 'detalle', 'motivo', 'zonas_asignadas', 
                            'alertas', 'latitud', 'longitud', 'zona', 
-                           'hash_id', 'fecha_carga', 'fecha_actualizacion']
+                           'hash_id', 'fecha_carga', 'fecha_actualizacion', 'estado_carga']
             
             insert_df = new_records_df[required_cols]
             insert_df.to_sql('actividades', engine, if_exists='append', 
@@ -332,24 +322,24 @@ def incremental_load_and_update(df, engine):
             inserted_count = len(new_records_df)
             logging.info(f"Nuevos registros insertados: {inserted_count}")
         
-        # Process updates for existing records
+        # Procesar actualizaciones para registros existentes
         updated_count = 0
         if not existing_records_df.empty:
-            changes_log = []
+            records_to_update = []
             
-            # Add record_id column from hash map
+            # Añadir columna record_id desde el mapa de hash
             existing_records_df['record_id'] = existing_records_df['hash_id'].map(existing_hash_map)
             
-            # Loop through records that need potential updates
+            # Recorrer registros que potencialmente necesitan actualizaciones
             for _, row in existing_records_df.iterrows():
                 record_id = row['record_id']
                 hash_id = row['hash_id']
                 
-                # Get the existing record
+                # Obtener el registro existente
                 existing_row = existing_records[existing_records['id'] == record_id].iloc[0]
                 
-                # Check for changes in each column
-                changes = {}
+                # Verificar cambios en cada columna
+                needs_update = False
                 column_types = {
                     'nombre_usuario': 'text', 'dni_vendedor': 'text', 'superior': 'text',
                     'actividad': 'text', 'detalle': 'text', 'motivo': 'text',
@@ -361,28 +351,21 @@ def incremental_load_and_update(df, engine):
                 for col, col_type in column_types.items():
                     if col in existing_row and col in row:
                         if values_are_different(existing_row[col], row[col], col_type):
-                            changes[col] = {
-                                'old': existing_row[col], 
-                                'new': row[col]
-                            }
+                            needs_update = True
+                            break
                 
-                # If changes detected, prepare update
-                if changes:
-                    changes_log.append({
-                        'record_id': record_id,
-                        'changes': changes,
-                        'row': row
-                    })
+                # Si se detectan cambios, preparar actualización
+                if needs_update:
+                    row['estado_carga'] = 'actualizado'
+                    records_to_update.append(row)
             
-            # Execute updates for records with changes
+            # Ejecutar actualizaciones para registros con cambios
             with engine.begin() as conn:
-                for change_entry in changes_log:
-                    record_id = change_entry['record_id']
-                    row = change_entry['row']
-                    changes = change_entry['changes']
+                for row in records_to_update:
+                    record_id = row['record_id']
                     
                     try:
-                        # Update main record
+                        # Actualizar registro principal
                         update_values = {
                             'nombre_usuario': row['nombre_usuario'],
                             'superior': row['superior'],
@@ -395,6 +378,7 @@ def incremental_load_and_update(df, engine):
                             'longitud': row['longitud'],
                             'zona': row['zona'],
                             'fecha_actualizacion': datetime.now(),
+                            'estado_carga': 'actualizado',
                             'id': record_id
                         }
                         
@@ -410,26 +394,11 @@ def incremental_load_and_update(df, engine):
                                 latitud = :latitud,
                                 longitud = :longitud,
                                 zona = :zona,
-                                fecha_actualizacion = :fecha_actualizacion
+                                fecha_actualizacion = :fecha_actualizacion,
+                                estado_carga = :estado_carga
                             WHERE id = :id
                         """)
                         conn.execute(update_query, update_values)
-                        
-                        # Log changes to history table
-                        for col, change in changes.items():
-                            historial_query = text("""
-                                INSERT INTO actividades_historial 
-                                (actividad_id, campo_modificado, valor_anterior, 
-                                 valor_nuevo, usuario_modificacion)
-                                VALUES (:id, :campo, :old_val, :new_val, :usuario)
-                            """)
-                            conn.execute(historial_query, {
-                                'id': record_id,
-                                'campo': col,
-                                'old_val': str(change['old']),
-                                'new_val': str(change['new']),
-                                'usuario': 'sistema_etl'
-                            })
                         updated_count += 1
                     except Exception as e:
                         logging.error(f"Error actualizando registro {record_id}: {e}")
@@ -444,78 +413,8 @@ def incremental_load_and_update(df, engine):
         logging.error(traceback.format_exc())
         raise
 
-def generate_report(engine, inserted_count, updated_count):
-    """Generates a report on loaded data"""
-    try:
-        stats_query = """
-        SELECT 
-            COUNT(*) as total_registros,
-            COUNT(DISTINCT dni_vendedor) as total_vendedores,
-            MIN(fecha) as fecha_minima,
-            MAX(fecha) as fecha_maxima
-        FROM actividades
-        """
-        stats = pd.read_sql(stats_query, engine)
-        
-        top_vendedores = """
-        SELECT 
-            dni_vendedor,
-            nombre_usuario,
-            COUNT(*) as total_actividades
-        FROM actividades
-        GROUP BY dni_vendedor, nombre_usuario
-        ORDER BY total_actividades DESC
-        LIMIT 10
-        """
-        vendedores = pd.read_sql(top_vendedores, engine)
-        
-        actividades = """
-        SELECT 
-            actividad,
-            COUNT(*) as cantidad
-        FROM actividades
-        GROUP BY actividad
-        ORDER BY cantidad DESC
-        """
-        dist_actividades = pd.read_sql(actividades, engine)
-        
-        current_load_stats = f"""
-        === RESUMEN DE LA CARGA ACTUAL ===
-        Registros nuevos insertados: {inserted_count}
-        Registros existentes actualizados: {updated_count}
-        Total procesados: {inserted_count + updated_count}
-        """
-        
-        print("\n=== REPORTE DE DATOS ===")
-        print(current_load_stats)
-        print(f"Total registros en BD: {stats['total_registros'].values[0]}")
-        print(f"Total vendedores: {stats['total_vendedores'].values[0]}")
-        print(f"Período de datos: {stats['fecha_minima'].values[0]} a {stats['fecha_maxima'].values[0]}")
-        
-        print("\nTop 5 vendedores por actividad:")
-        print(vendedores.head(5))
-        
-        print("\nDistribución de actividades:")
-        print(dist_actividades)
-        
-        with open('reporte_carga.txt', 'w') as f:
-            f.write("=== REPORTE DE DATOS ===\n")
-            f.write(current_load_stats + "\n")
-            f.write(f"Total registros en BD: {stats['total_registros'].values[0]}\n")
-            f.write(f"Total vendedores: {stats['total_vendedores'].values[0]}\n")
-            f.write(f"Período de datos: {stats['fecha_minima'].values[0]} a {stats['fecha_maxima'].values[0]}\n\n")
-            f.write("Top 10 vendedores por actividad:\n")
-            f.write(vendedores.to_string(index=False))
-            f.write("\n\nDistribución de actividades:\n")
-            f.write(dist_actividades.to_string(index=False))
-        
-        logging.info("Reporte generado correctamente")
-    except Exception as e:
-        logging.error(f"Error al generar el reporte: {e}")
-        print(f"Error al generar el reporte: {e}")
-
 def check_table_columns(engine, table_name):
-    """Verifies and adds missing columns with correct types"""
+    """Verifica y añade columnas faltantes con tipos correctos"""
     try:
         inspector = inspect(engine)
         columns = inspector.get_columns(table_name)
@@ -523,7 +422,8 @@ def check_table_columns(engine, table_name):
         
         required_columns = {
             'hash_id': 'VARCHAR(32)',
-            'fecha_actualizacion': 'TIMESTAMP'
+            'fecha_actualizacion': 'TIMESTAMP',
+            'estado_carga': 'VARCHAR(20)'
         }
         
         with engine.begin() as conn:
@@ -537,61 +437,95 @@ def check_table_columns(engine, table_name):
         logging.error(f"Error en verificación de columnas: {e}")
         return False
 
+def get_data_summary(engine):
+    """Obtiene un resumen de los datos almacenados"""
+    try:
+        summary_queries = {
+            "total_records": "SELECT COUNT(*) FROM actividades",
+            "records_by_status": "SELECT estado_carga, COUNT(*) FROM actividades GROUP BY estado_carga",
+            "records_by_activity": "SELECT actividad, COUNT(*) FROM actividades GROUP BY actividad ORDER BY COUNT(*) DESC LIMIT 5"
+        }
+        
+        results = {}
+        with engine.connect() as conn:
+            for key, query in summary_queries.items():
+                result = conn.execute(text(query))
+                if key == "total_records":
+                    results[key] = result.scalar()
+                else:
+                    results[key] = [(row[0], row[1]) for row in result]
+        
+        return results
+    except Exception as e:
+        logging.error(f"Error obteniendo resumen de datos: {e}")
+        return None
+
 def main():
-    """Main function that executes the incremental load and update process"""
+    """Función principal que ejecuta el proceso de carga incremental y actualización"""
     try:
         print("=== INICIANDO PROCESO DE CARGA INCREMENTAL DE DATOS ===")
         logging.info("Iniciando proceso de carga y actualización de datos")
         
-        # Verify and establish connection
-        engine = verify_con(servidor, db, user, password)
+        # Verificar y establecer conexión
+        engine = verify_connection(DB_CONFIG)
         if not engine:
             logging.error("No se pudo establecer conexión con la base de datos. Abortando.")
             return
         
-        # Set up database
+        # Configurar base de datos
         if not setup_database(engine):
             logging.error("No se pudo configurar la base de datos. Abortando.")
             return
         
-        # Verify necessary columns
+        # Verificar columnas necesarias
         if not check_table_columns(engine, 'actividades'):
             logging.error("No se pudieron verificar o crear columnas necesarias. Abortando.")
             return
         
-        # Verify if file exists
-        if not os.path.exists(file_path):
-            logging.error(f"El archivo {file_path} no existe.")
+        # Verificar si el archivo existe
+        if not os.path.exists(FILE_PATH):
+            logging.error(f"El archivo {FILE_PATH} no existe.")
             return
         
-        # Load data from Excel
-        df = load_excel_data(file_path)
+        # Cargar datos desde Excel
+        df = load_excel_data(FILE_PATH)
         if df is None or df.empty:
             logging.error("No se pudo cargar el archivo Excel o está vacío. Abortando.")
             return
         
-        # Show sample data for debugging
+        # Mostrar datos de muestra para depuración
         print("Primeras filas del Excel:")
         print(df.head())
         print(f"Registros en el archivo Excel: {len(df)}")
         
-        # Preprocess data
+        # Preprocesar datos
         df = preprocess_data(df)
         
-        # Show processed data
+        # Mostrar datos procesados
         print("Primeras filas después del preprocesamiento:")
         print(df.head())
         print(f"Registros después del preprocesamiento: {len(df)}")
         
-        # Perform incremental load and update
+        # Realizar carga incremental y actualización
         inserted_count, updated_count = incremental_load_and_update(df, engine)
         
-        # Generate report
-        generate_report(engine, inserted_count, updated_count)
+        # Obtener resumen de datos
+        data_summary = get_data_summary(engine)
         
+        # Generar informe
         logging.info(f"Proceso completado exitosamente. Nuevos: {inserted_count}, Actualizados: {updated_count}")
         print("\n=== PROCESO COMPLETADO EXITOSAMENTE ===")
         print(f"Se insertaron {inserted_count} registros nuevos y se actualizaron {updated_count} registros.")
+        
+        if data_summary:
+            print("\n=== RESUMEN DE DATOS EN LA BASE ===")
+            print(f"Total de registros: {data_summary['total_records']}")
+            print("\nRegistros por estado:")
+            for estado, count in data_summary['records_by_status']:
+                print(f"  - {estado}: {count}")
+            print("\nPrincipales actividades:")
+            for actividad, count in data_summary['records_by_activity']:
+                print(f"  - {actividad}: {count}")
         
     except Exception as e:
         logging.error(f"Error en el proceso principal: {e}")

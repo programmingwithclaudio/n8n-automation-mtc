@@ -1,0 +1,42 @@
+# Configuración para la carga incremental
+db:
+  servidor: "localhost"
+  db: "testdbauren"
+  user: "postgres"
+  password: "localpassword"
+
+# Tabla destino en la base de datos
+tabla_destino: "detallado"
+
+# Archivo de origen de datos
+archivo_excel: "C:\\Users\\oak\\Downloads\\Detallado.xlsx"
+
+# Columna que se usa como clave única para identificar registros
+clave_unica: "codigo_fe"
+
+# Archivo de log
+log_file: "carga_incremental.log"
+
+# Mapeo de columnas del Excel a la base de datos
+# Si las columnas del Excel no coinciden con las de la BD, definir aquí el mapeo
+mapeo_columnas:
+  "Usuario": "usuario"
+  "Supervisor": "supervisor"
+  "Region": "region"
+  "Zonal": "zonal"
+  "DNI Vendedor": "dni_vendedor"
+  "Formulario": "formulario"
+  "Cliente": "cliente"
+  "Fecha": "fecha"
+  "Código FE": "codigo_fe"
+  "TIPO OPERACIÓN": "tipo_operacion"
+  "DNI CLIENTE": "dni_cliente"
+  "NOMBRE DEL CLIENTE": "nombre_cliente"
+  "DIRECCIÓN INSTALACIÓN": "direccion_instalacion"
+  "TELÉFONO CONTACTO": "telefono_contacto"
+  "TELEFONO DE CONTACTO (Otro)": "telefono_contacto_otro"
+  "PRODUCTO": "producto"
+  "Nro. Pedido": "nro_pedido"
+  "Usuario Dito": "usuario_dito"
+  "Scoring (Dito)": "scoring_dito"
+  "¿Es venta de hoy?": "es_venta_hoy"

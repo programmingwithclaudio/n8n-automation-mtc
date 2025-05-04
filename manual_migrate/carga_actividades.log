@@ -1,0 +1,10 @@
+2025-05-04 11:44:51,064 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-04 11:44:51,148 - INFO - Conexión exitosa a PostgreSQL
+2025-05-04 11:44:51,153 - INFO - Tablas verificadas o creadas correctamente
+2025-05-04 11:44:51,417 - INFO - Datos cargados del Excel: 57 filas
+2025-05-04 11:44:51,433 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-04 11:44:51,437 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-04 11:44:51,452 - INFO - Preprocesamiento completado. Registros: 57
+2025-05-04 11:44:51,485 - INFO - Obtenidos 57 registros existentes para comparación
+2025-05-04 11:44:51,534 - INFO - Registros actualizados con cambios: 1
+2025-05-04 11:44:51,538 - INFO - Proceso completado exitosamente. Nuevos: 0, Actualizados: 1

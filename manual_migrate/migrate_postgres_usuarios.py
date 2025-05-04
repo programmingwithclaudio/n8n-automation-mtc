@@ -2,12 +2,14 @@ import pandas as pd
 import os
 from datetime import datetime
 import logging
-from sqlalchemy import create_engine, text, inspect
+import hashlib
 import sys
+from sqlalchemy import create_engine, text, inspect
+import traceback
 
 # Configuración de logging con UTF-8 y DEBUG
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-log_filename = f'usuarios_load_postgres_{timestamp}.log'
+log_filename = rf'manual_migrate\carga_usuarios_{timestamp}.log'
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -22,25 +24,22 @@ console.setFormatter(formatter)
 logging.getLogger().addHandler(console)
 
 # Parámetros de conexión (ajustar según entorno)
-db_params = {
+DB_CONFIG = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'postgres',
+    'database': 'testdbauren',
     'user': 'postgres',
     'password': 'localpassword'
 }
-#file_path = r"C:\Users\jimmy.atao\Downloads\usuario.xlsx"
-file_path = r"C:\Users\oak\Downloads\usuario.xlsx"
-# Fecha de procesamiento actual
-date_today = datetime.now()
-FECHA_PROCESO = date_today.date()  # tipo DATE
+
+# Ruta del archivo Excel
+FILE_PATH = r"C:\Users\oak\Downloads\usuario.xlsx"
 
 # Nombre de la tabla destino
 TABLE_NAME = 'usuarios'
 
-
-def verify_con(params):
-    """Verifica la conexión y retorna engine."""
+def verify_connection(params):
+    """Verifica la conexión a la base de datos y retorna engine."""
     conn_str = (
         f"postgresql://{params['user']}:{params['password']}@"
         f"{params['host']}:{params['port']}/{params['database']}"
@@ -56,18 +55,44 @@ def verify_con(params):
         print(f"Error de conexión: {e}")
         return None
 
+def create_hash_id(row, key_fields):
+    """
+    Crea un hash ID consistente basado en los campos clave proporcionados.
+    """
+    key_values = []
+    
+    for field in key_fields:
+        if field in row and pd.notna(row[field]):
+            # Normalizar el valor para consistencia
+            val = str(row[field]).strip()
+            key_values.append(val)
+        else:
+            # Valor consistente para campos vacíos/nulos
+            key_values.append('NULL')
+    
+    key_str = '|'.join(key_values)
+    return hashlib.md5(key_str.encode()).hexdigest()
 
 def setup_database(engine, df_columns):
     """
-    Crea o ajusta la tabla dinámica según las columnas del DataFrame,
-    incluyendo fecha_proceso como clave.
+    Crea o ajusta la tabla para usuarios con soporte para carga incremental.
     """
     # Columnas dinámicas según el Excel
     cols_ddl = [f'"{col}" TEXT' for col in df_columns]
-    # Añadir fecha_proceso
-    cols_ddl.append('"fecha_proceso" DATE NOT NULL')
-
-    # Definir PRIMARY KEY sobre dni, zonal, telefono, fecha_proceso
+    
+    # Columnas adicionales para gestión incremental
+    additional_cols = [
+        '"fecha_proceso" DATE NOT NULL',
+        '"fecha_carga" TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+        '"fecha_actualizacion" TIMESTAMP',
+        '"hash_id" VARCHAR(32)',
+        '"estado_carga" VARCHAR(20) DEFAULT \'nuevo\''
+    ]
+    
+    # Construir DDL
+    all_cols_ddl = cols_ddl + additional_cols
+    
+    # Definir PRIMARY KEY tradicional sobre dni, zonal, telefono, fecha_proceso
     pk_fields = []
     for key in ['dni', 'zonal', 'telefono']:
         for col in df_columns:
@@ -76,109 +101,305 @@ def setup_database(engine, df_columns):
                 break
     pk_fields.append('"fecha_proceso"')
     pk_ddl = f'PRIMARY KEY ({", ".join(pk_fields)})'
-
+    
+    # Crear la tabla si no existe
     ddl = (
         f"CREATE TABLE IF NOT EXISTS {TABLE_NAME} (\n  "
-        + ",\n  ".join(cols_ddl + [pk_ddl])
+        + ",\n  ".join(all_cols_ddl + [pk_ddl])
         + "\n);"
     )
+    
     with engine.begin() as conn:
         conn.execute(text(ddl))
-    logging.info(f"Tabla {TABLE_NAME} creada o ajustada con fecha_proceso como clave.")
+        
+        # Crear índice para hash_id
+        conn.execute(text(f'''
+            CREATE INDEX IF NOT EXISTS idx_{TABLE_NAME}_hash_id
+            ON {TABLE_NAME} (hash_id);
+        '''))
+        
+    logging.info(f"Tabla {TABLE_NAME} configurada para soporte incremental")
+    return True
 
+def load_excel_data(filepath):
+    """Carga datos desde un archivo Excel."""
+    try:
+        df = pd.read_excel(filepath)
+        
+        # Mantener casing original y quitar espacios
+        df.columns = [col.strip() for col in df.columns]
+        
+        # Limpieza básica de datos
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].astype(str).str.strip()
+                df[col] = df[col].replace('nan', None)
+        
+        logging.info(f"DataFrame cargado: {len(df)} filas con {len(df.columns)} columnas")
+        return df
+    except Exception as e:
+        logging.error(f"Error cargando Excel: {e}")
+        return None
 
-def load_full_reload(df, engine):
+def preprocess_data(df):
     """
-    Full reload: borra registros de la fecha actual e inserta datos crudos.
-
-    - Rellena nulos en DNI, Zonal y Telefono (parte de PK).
-    - Agrega columna fecha_proceso (type DATE).
+    Preprocesa los datos para carga incremental:
+    - Rellena nulos en campos de PK
+    - Agrega fecha_proceso
+    - Genera hash_id para cada registro
     """
-    # Mantener casing y quitar espacios
-    df.columns = [col.strip() for col in df.columns]
-
     # Rellenar nulos en columnas de clave primaria
     for key in ['dni', 'zonal', 'telefono']:
         for col in df.columns:
             if col.lower() == key:
                 df[col] = df[col].fillna('DESCONOCIDO')
                 break
+    
+    # Identificar campos clave para hash
+    key_fields = []
+    for key in ['dni', 'zonal', 'telefono']:
+        for col in df.columns:
+            if col.lower() == key:
+                key_fields.append(col)
+                break
+    
+    # Fecha de proceso (mantenemos DATE para compatibilidad)
+    fecha_proceso = datetime.now().date()
+    df['fecha_proceso'] = fecha_proceso
+    key_fields.append('fecha_proceso')
+    
+    # Generar hash_id basado en campos clave
+    df['hash_id'] = df.apply(lambda row: create_hash_id(row, key_fields), axis=1)
+    
+    # Añadir timestamps y estado inicial
+    now = datetime.now()
+    df['fecha_carga'] = now
+    df['fecha_actualizacion'] = now
+    df['estado_carga'] = 'nuevo'
+    
+    logging.info(f"Preprocesamiento completado. {len(df)} registros preparados.")
+    return df, key_fields
 
-    # Agregar fecha_proceso
-    df['fecha_proceso'] = FECHA_PROCESO
-
-    # Obtener columnas de la tabla
-    insp = inspect(engine)
-    cols_meta = [col['name'] for col in insp.get_columns(TABLE_NAME)]
-    insert_cols = [col for col in df.columns if col in cols_meta]
-    df_ins = df[insert_cols]
-
-    # Eliminar snapshot previo
-    with engine.begin() as conn:
-        conn.execute(
-            text(f'DELETE FROM {TABLE_NAME} WHERE "fecha_proceso" = :fp'),
-            {'fp': FECHA_PROCESO}
-        )
-    logging.info(f"Eliminados registros de fecha {FECHA_PROCESO} en {TABLE_NAME}")
-
-    # Bulk insert
+def get_existing_records(engine, fecha_proceso):
+    """
+    Obtiene registros existentes para la fecha de proceso actual.
+    """
+    query = text(f"""
+    SELECT * FROM {TABLE_NAME}
+    WHERE "fecha_proceso" = :fecha_proceso
+    """)
+    
     try:
-        df_ins.to_sql(TABLE_NAME, engine, if_exists='append', index=False)
-        logging.info(f"Insertadas {len(df_ins)} filas en {TABLE_NAME} para {FECHA_PROCESO}")
+        with engine.connect() as conn:
+            result = conn.execute(query, {"fecha_proceso": fecha_proceso})
+            columns = result.keys()
+            data = result.fetchall()
+            
+        if not data:
+            logging.info(f"No existen registros para la fecha {fecha_proceso}")
+            return pd.DataFrame()
+        
+        # Crear DataFrame con los resultados
+        existing_df = pd.DataFrame(data, columns=columns)
+        logging.info(f"Obtenidos {len(existing_df)} registros existentes para comparación")
+        return existing_df
     except Exception as e:
-        logging.error(f"Error al insertar registros: {e}")
-        print(f"Error al insertar: {e}")
+        logging.error(f"Error al obtener registros existentes: {e}")
+        return pd.DataFrame()
 
+def incremental_load_and_update(df, engine, key_fields):
+    """
+    Realiza la carga incremental de usuarios:
+    - Identifica registros nuevos vs existentes usando hash_id
+    - Inserta nuevos registros
+    - Actualiza registros existentes si hay cambios
+    """
+    try:
+        fecha_proceso = df['fecha_proceso'].iloc[0]
+        existing_records = get_existing_records(engine, fecha_proceso)
+        
+        if existing_records.empty:
+            # No hay registros existentes para esta fecha, insertar todos
+            logging.info(f"No hay registros existentes para {fecha_proceso}. Insertando todos como nuevos.")
+            df.to_sql(TABLE_NAME, engine, if_exists='append', index=False, chunksize=500)
+            return len(df), 0
+        
+        # Crear hashmap de registros existentes
+        existing_hash_set = set(existing_records['hash_id'].tolist())
+        existing_hash_to_id = dict(zip(existing_records['hash_id'], existing_records.index))
+        
+        # Separar registros nuevos y existentes
+        df['is_new'] = ~df['hash_id'].isin(existing_hash_set)
+        new_records = df[df['is_new']].drop(columns=['is_new'])
+        existing_updates = df[~df['is_new']].drop(columns=['is_new'])
+        
+        # Insertar nuevos registros
+        inserted_count = 0
+        if not new_records.empty:
+            new_records.to_sql(TABLE_NAME, engine, if_exists='append', index=False, chunksize=500)
+            inserted_count = len(new_records)
+            logging.info(f"Insertados {inserted_count} nuevos registros")
+        
+        # Identificar y actualizar registros con cambios
+        updated_count = 0
+        if not existing_updates.empty:
+            # Identificar registros que requieren actualización
+            records_to_update = []
+            
+            for _, row in existing_updates.iterrows():
+                hash_id = row['hash_id']
+                existing_row = existing_records[existing_records['hash_id'] == hash_id].iloc[0]
+                
+                # Comprobar si hay cambios en algún campo (excluyendo campos de control)
+                exclude_cols = ['hash_id', 'fecha_carga', 'fecha_actualizacion', 'estado_carga', 'fecha_proceso']
+                needs_update = False
+                
+                for col in row.index:
+                    if col not in exclude_cols and col in existing_row:
+                        # Normalizar valores para comparación
+                        new_val = str(row[col]).strip() if pd.notna(row[col]) else None
+                        old_val = str(existing_row[col]).strip() if pd.notna(existing_row[col]) else None
+                        
+                        if new_val != old_val:
+                            needs_update = True
+                            break
+                
+                if needs_update:
+                    row['estado_carga'] = 'actualizado'
+                    row['fecha_actualizacion'] = datetime.now()
+                    records_to_update.append(row)
+            
+            # Ejecutar actualizaciones
+            if records_to_update:
+                # Construir campos para actualizar
+                for update_row in records_to_update:
+                    # Construir condiciones para identificar el registro específico
+                    conditions = []
+                    params = {}
+                    
+                    # Campos para la condición WHERE
+                    for key in key_fields:
+                        if key in update_row:
+                            conditions.append(f'"{key}" = :{key}')
+                            params[key] = update_row[key]
+                    
+                    # Campos a actualizar
+                    update_fields = []
+                    for col in update_row.index:
+                        if col not in key_fields and col not in ['hash_id', 'fecha_carga', 'is_new']:
+                            update_fields.append(f'"{col}" = :{col}')
+                            params[col] = update_row[col]
+                    
+                    # Construir y ejecutar la consulta UPDATE
+                    if update_fields and conditions:
+                        update_sql = f"""
+                        UPDATE {TABLE_NAME}
+                        SET {', '.join(update_fields)}
+                        WHERE {' AND '.join(conditions)}
+                        """
+                        
+                        with engine.begin() as conn:
+                            conn.execute(text(update_sql), params)
+                        updated_count += 1
+                
+                logging.info(f"Actualizados {updated_count} registros con cambios")
+        
+        return inserted_count, updated_count
+        
+    except Exception as e:
+        logging.error(f"Error en carga incremental: {e}")
+        logging.error(traceback.format_exc())
+        raise
+
+def get_data_summary(engine, fecha_proceso):
+    """Obtiene un resumen de los datos por estado de carga."""
+    try:
+        with engine.connect() as conn:
+            # Total de registros para la fecha
+            total_query = text(f"""
+                SELECT COUNT(*)
+                FROM {TABLE_NAME}
+                WHERE "fecha_proceso" = :fecha
+            """)
+            total_result = conn.execute(total_query, {"fecha": fecha_proceso}).scalar()
+            
+            # Registros por estado
+            estados_query = text(f"""
+                SELECT "estado_carga", COUNT(*)
+                FROM {TABLE_NAME}
+                WHERE "fecha_proceso" = :fecha
+                GROUP BY "estado_carga"
+            """)
+            estados_result = conn.execute(estados_query, {"fecha": fecha_proceso})
+            estados_data = [(row[0], row[1]) for row in estados_result]
+        
+        return {
+            "total": total_result,
+            "por_estado": estados_data
+        }
+    except Exception as e:
+        logging.error(f"Error obteniendo resumen de datos: {e}")
+        return None
 
 def main():
-    logging.info(f"Inicio full reload para fecha: {FECHA_PROCESO}")
-    engine = verify_con(db_params)
-    if not engine:
-        return
-
-    if not os.path.exists(file_path):
-        logging.error(f"Archivo no existe: {file_path}")
-        return
-
+    """Función principal del proceso de carga incremental."""
+    print("=== INICIANDO PROCESO DE CARGA INCREMENTAL DE USUARIOS ===")
+    logging.info("Iniciando proceso de carga incremental")
+    
     try:
-        df = pd.read_excel(file_path)
-        logging.info(f"DataFrame cargado: {len(df)} filas.")
+        # Verificar conexión
+        engine = verify_connection(DB_CONFIG)
+        if not engine:
+            logging.error("No se pudo establecer conexión. Proceso abortado.")
+            return
+        
+        # Verificar archivo
+        if not os.path.exists(FILE_PATH):
+            logging.error(f"Archivo no existe: {FILE_PATH}")
+            return
+        
+        # Cargar datos
+        df = load_excel_data(FILE_PATH)
+        if df is None or df.empty:
+            logging.error("No se pudieron cargar datos del Excel. Proceso abortado.")
+            return
+        
+        # Configurar base de datos
+        setup_database(engine, list(df.columns))
+        
+        # Preprocesar datos
+        df, key_fields = preprocess_data(df)
+        
+        # Mostrar muestra de datos
+        print("Muestra de datos a procesar:")
+        print(df.head())
+        
+        # Procesar carga incremental
+        fecha_proceso = df['fecha_proceso'].iloc[0]
+        inserted, updated = incremental_load_and_update(df, engine, key_fields)
+        
+        # Obtener resumen
+        summary = get_data_summary(engine, fecha_proceso)
+        
+        # Mostrar resultados
+        print("\n=== RESUMEN DE CARGA ===")
+        print(f"Fecha de proceso: {fecha_proceso}")
+        print(f"Registros nuevos insertados: {inserted}")
+        print(f"Registros actualizados: {updated}")
+        
+        if summary:
+            print(f"\nTotal de registros para fecha {fecha_proceso}: {summary['total']}")
+            print("Distribución por estado:")
+            for estado, count in summary['por_estado']:
+                print(f"  - {estado}: {count}")
+        
+        logging.info("Proceso completado exitosamente")
+        print("\n=== PROCESO COMPLETADO EXITOSAMENTE ===")
+        
     except Exception as e:
-        logging.error(f"Error cargando Excel: {e}")
-        return
+        logging.error(f"Error en proceso principal: {e}")
+        logging.error(traceback.format_exc())
+        print(f"Error: {e}")
 
-    setup_database(engine, list(df.columns))
-    load_full_reload(df, engine)
-    logging.info("Proceso completado.")
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-
-"""registros de usuarios.xlsx 
-muestra de registros en 
-| Usuario   | Empresa | Nombre                             | DNI        | Rol                     | Poblacion | Zonal   | Email                             | Telefono  | Region       | Genero | Superior                                | Direccion                                      | Pais | CodigoPostal | ZonaHoraria                          | FechaIngreso | FechaCese | Estado    |
-|-----------|---------|------------------------------------|------------|-------------------------|-----------|---------|-----------------------------------|-----------|--------------|--------|-----------------------------------------|------------------------------------------------|------|--------------|--------------------------------------|--------------|-----------|-----------|
-| 29398271  |         | ACHAHUANCO MERMA YOLANDA          | 29398271   | VENDEDOR - PLANILLA     |           | AREQUIPA| yolanda.achahunco@gmail.com      | 959670343 | REGION SUR   | Mujer  | ZEBALLOS ESCOBAR KAREN YULEISY       | San Martín 1817 Chapi Chico                    | Perú |              | (UTC-05:00) Bogota, Lima, Quito    | 01/03/2024   |           | En campo  |
-| 44137762  |         | ACOSTA HERRERA MILAGROS DE MARIA  | 44137762   | VENDEDOR - COMISIONISTA  |           | CHIMBOTE| milagrosacostaherrera@gmail.com   | 944316201 | REGION CENTRO| Mujer  | GONZALES GUTIERREZ ALEXANDER ISMAEL  | UB Nicolas garatea mz 118 LT 21                | Perú |              | (UTC-05:00) Bogota, Lima, Quito    | 12/03/2025   |           | En campo  |
-| 003495147 |         | ACUÑA SANCHEZ JACOB               | 003495147  | VENDEDOR - COMISIONISTA  | Arequipa  | AREQUIPA| vcordero.auren@gmail.com          | 926642555 | REGION SUR   | Hombre | ZARRAGA HENRIQUEZ SIMON ENRIQUE      |                                                | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 71583936  |         | ACUÑA VEGA FLOR MARIA             | 71583936   | VENDEDOR - PLANILLA     | Áncash    | HUARAZ  | estefaniam10.16@gmail.com         | 956440655 | REGION CENTRO| Mujer  | GIRALDO LOPEZ RIVALDO ANDRES         | Jr. Esteban Castromonte -S/N- Barrio Pedregal Medio | Perú | **           | (UTC-05:00) Bogota, Lima, Quito    | 13/03/2025   |           | En campo  |
-| 43863338  |         | ACUÑA VEGA RONALD ELIOT           | 43863338   | VENDEDOR - COMISIONISTA  |           | HUARAZ  | eronald2020@gmail.com             | 958123625 | REGION CENTRO| Hombre | GIRALDO LOPEZ RIVALDO ANDRES         | Jr. Esteban Castromonte S/N Barr. Pedregal Medio | Perú |              | (UTC-05:00) Bogota, Lima, Quito    | 18/03/2025   |           | En campo  |
-| 43002051  |         | ADCO GÓMEZ DUDLEY DANIEL          | 43002051   | BACK OFFICE             | Arequipa  | AREQUIPA| adudley.auren@gmail.com           | 978589177 | REGION SUR   | Hombre | AREVALO LAIMITO CARLOS ALBERTO      |                                                | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | Sin especificar |
-| 75114101  |         | AGUILAR LAURA RUTH ESTHER         | 75114101   | VENDEDOR - PLANILLA     |           | AREQUIPA| ruthesteraguilarlaura123@gmail.com| 918077535 | REGION SUR   | Hombre | ALVAREZ VELARDE GABRIEL ANDRE       | 3 DE OCTUBRE MZ D LT 1                        | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 70133406  |         | AGUILAR LEON MARYORI ELIZABETH    | 70133406   | VENDEDOR - COMISIONISTA  |           | CHIMBOTE|                                   | 936494671 | REGION CENTRO| Mujer  | RAMOS JARA FAUSTO ADALBERTO         |                                                | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 70600373  |         | AGUILAR SALAS GUILLERMO DANIEL    | 70600373   | VENDEDOR - PLANILLA     |           | TACNA   | raquel.torres@grupoauren.pe      | 926216788 | REGION SUR   | Hombre | TORRES ARIAS RAQUEL NATALIA         | Conjunto Habitacional Habitat II Nro k-02 Tacna | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 47926807  |         | ALBERTO HENOSTROZA ISAMAR JENIFFER| 47926807   | VENDEDOR - COMISIONISTA  |           | HUARAZ  | jenifferalbertohernostroza@gmail.com | 900903304 | REGION CENTRO| Mujer  | ALBERTO HENOSTROZA LILIANA ARACELLI | Ca. Caserio Chequio S/N Cas. Chequio          | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 76649551  |         | ALBERTO HENOSTROZA LILIANA ARACELLI| 76649551  | SUPERVISOR              | Áncash    | HUARAZ  |                                   | 975893933 | REGION CENTRO| Mujer  | ANGELITA LETICIA ESQUIVEL           |                                                | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | Sin especificar |
-| 40504105  |         | ALBIÑO ALAMO LAURA YENIFER       | 40504105   | VENDEDOR - COMISIONISTA  |           | CHIMBOTE| sh4n3c1t4@gmail.com               | 977301497 | REGION CENTRO| Mujer  | CHAVEZ VIZALOTE MARIA DEL PILAR     | Bellamar 2etpa MZ N5 lt 9 Nuevo Chimbote      | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 61833676  |         | ALDAIR FELIX TOLEDO ALARCON       | 61833676   | BACK OFFICE             |           | LIMA ESTE| atoledo.auren@gmail.com           | 937735468 | LIMA         | Hombre |                                         | CALLE SANTA TERESA 179 URB LOS SAUCES - ATE - LIMA | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | Sin especificar |
-| 40157205  |         | ALVAREZ MARTELL JAQUELINE MARIBEL | 40157205   | VENDEDOR - COMISIONISTA  |           | TRUJILLO| jaquelinemaribel2@gmail.com       | 975015881 | REGION NORTE | Mujer  | ROMERO PANDURO JUAN DE DIOS         | Los Pinos Mz P lt 2- AA.HH Víctor Raúl        | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-| 74162049  |         | ALVAREZ RAMOS CLAUDIA ALESSANDRA  | 74162049   | VENDEDOR - PLANILLA     |           | TACNA   | pollonet1977@gmail.com            | 929668363 | REGION SUR   | Mujer  | TORRES ARIAS RAQUEL NATALIA         | Promuvi Viñani MZ 337 LT 14                    | Perú |              | (UTC-05:00) Bogota, Lima, Quito    |              |           | En campo  |
-
-"""
-
-"""errores
-
-
-"""

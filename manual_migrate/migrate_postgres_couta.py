@@ -122,7 +122,7 @@ def calculate_hash(row):
 def preprocess_data(df):
     """Preprocesa los datos para normalizarlos"""
     # Verificar y crear columnas faltantes si es necesario
-    expected_columns = ['Fecha', 'Zonal', 'Supervisor', 'Valor']
+    expected_columns = ['Fecha', 'Zonal', 'supervisor', 'Valor']
     
     # Imprimir las columnas actuales para verificar
     print(f"Columnas originales: {df.columns.tolist()}")
@@ -344,7 +344,7 @@ def generate_report(engine):
         print(supervisores)
         
         # Guardar reporte en archivo
-        with open('reporte_cuotas.txt', 'w', encoding='utf-8') as f:
+        with open(r'manual_migrate\carga_cuotas.txt', 'w', encoding='utf-8') as f:
             f.write("=== REPORTE DE CUOTAS ===\n")
             f.write(f"Total registros: {stats['total_registros'].values[0]}\n")
             f.write(f"Período de datos: {stats['fecha_minima'].values[0]} a {stats['fecha_maxima'].values[0]}\n")

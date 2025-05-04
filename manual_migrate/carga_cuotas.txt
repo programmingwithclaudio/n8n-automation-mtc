@@ -1,0 +1,29 @@
+=== REPORTE DE CUOTAS ===
+Total registros: 99
+Período de datos: 2025-05-01 a 2025-05-04
+Total zonales: 7
+Total supervisores: 25
+Valor total de cuotas: 956
+
+Distribución por zonales:
+   zonal  cantidad  valor_total  valor_promedio
+AREQUIPA        32          312        9.750000
+CHIMBOTE        19          228       12.000000
+  HUARAZ        12          144       12.000000
+TRUJILLO         8           92       11.500000
+   TACNA        12           92        7.666667
+    LIMA         8           48        6.000000
+     ILO         8           40        5.000000
+
+Top 10 supervisores por valor total:
+                         supervisor    zonal  valor_total
+    ZARRAGA HENRIQUEZ SIMON ENRIQUE AREQUIPA           64
+        CACERES MARTINEZ JULIO RAUL AREQUIPA           56
+        HUANCA CONDORI ANGEL DANIEL AREQUIPA           48
+ALBERTO HENOSTROZA LILIANA ARACELLI   HUARAZ           48
+        RAMOS JARA FAUSTO ADALBERTO CHIMBOTE           48
+        ORDINOLA MEJIA JOHAN XAVIER CHIMBOTE           48
+       GIRALDO LOPEZ RIVALDO ANDRES   HUARAZ           48
+    CHAVEZ VIZALOTE MARIA DEL PILAR CHIMBOTE           48
+GONZALES GUTIERREZ ALEXANDER ISMAEL CHIMBOTE           48
+   GUTIERREZ BENITES OSCAR PATRICIO TRUJILLO           48

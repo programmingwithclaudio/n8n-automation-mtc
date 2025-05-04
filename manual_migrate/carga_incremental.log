@@ -1,0 +1,26 @@
+2025-05-04 11:29:29,932 - INFO - Iniciando proceso de carga incremental
+2025-05-04 11:29:30,001 - INFO - Conexi�n exitosa a la base de datos testdbauren
+2025-05-04 11:29:30,028 - INFO - La tabla ventas_actividad ya existe
+2025-05-04 11:29:30,028 - INFO - Cargando datos desde C:\Users\oak\Downloads\Detallado.xlsx
+2025-05-04 11:29:30,275 - INFO - Se cargaron 14 registros del archivo Excel
+2025-05-04 11:29:30,279 - INFO - Se encontraron 14 registros existentes
+2025-05-04 11:29:30,331 - INFO - Se actualizaron 14 registros existentes
+2025-05-04 11:29:30,331 - INFO - Proceso completado: 0 registros nuevos, 14 registros actualizados, 14 registros procesados en total
+2025-05-04 11:31:12,882 - INFO - Iniciando proceso de carga incremental
+2025-05-04 11:31:12,945 - INFO - Conexi�n exitosa a la base de datos testdbauren
+2025-05-04 11:31:12,990 - INFO - Tabla ventas_actividad creada exitosamente
+2025-05-04 11:31:12,990 - INFO - Cargando datos desde C:\Users\oak\Downloads\Detallado.xlsx
+2025-05-04 11:31:13,229 - INFO - Se cargaron 14 registros del archivo Excel
+2025-05-04 11:31:13,233 - INFO - Se encontraron 0 registros existentes
+2025-05-04 11:31:13,256 - INFO - Se insertaron 14 registros nuevos
+2025-05-04 11:31:13,257 - INFO - Se actualizaron 0 registros existentes
+2025-05-04 11:31:13,257 - INFO - Proceso completado: 14 registros nuevos, 0 registros actualizados, 14 registros procesados en total
+2025-05-04 11:32:47,937 - INFO - Iniciando proceso de carga incremental
+2025-05-04 11:32:48,004 - INFO - Conexi�n exitosa a la base de datos testdbauren
+2025-05-04 11:32:48,047 - INFO - Tabla detallado creada exitosamente
+2025-05-04 11:32:48,047 - INFO - Cargando datos desde C:\Users\oak\Downloads\Detallado.xlsx
+2025-05-04 11:32:48,289 - INFO - Se cargaron 14 registros del archivo Excel
+2025-05-04 11:32:48,292 - INFO - Se encontraron 0 registros existentes
+2025-05-04 11:32:48,315 - INFO - Se insertaron 14 registros nuevos
+2025-05-04 11:32:48,318 - INFO - Se actualizaron 0 registros existentes
+2025-05-04 11:32:48,319 - INFO - Proceso completado: 14 registros nuevos, 0 registros actualizados, 14 registros procesados en total

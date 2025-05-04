@@ -1,0 +1,29 @@
+=== REPORTE DE DATOS ===
+
+        === RESUMEN DE LA CARGA ACTUAL ===
+        Registros nuevos insertados: 57
+        Registros existentes actualizados: 0
+        Total procesados: 57
+        
+Total registros en BD: 57
+Total vendedores: 24
+Período de datos: 2025-05-01T00:30:50.000000000 a 2025-05-01T23:04:57.000000000
+
+Top 10 vendedores por actividad:
+dni_vendedor                   nombre_usuario  total_actividades
+    43376281  HURTADO ROQUE ANTONIO ALEJANDRO                  7
+    32981139        VASQUEZ SALDAÑA LUZ MARIA                  4
+    48125976       TEJADA TACO REYNALDO VIDAL                  4
+    45480631    OLGUIN QUISPE JESSICA YULIANA                  4
+    47440592     VELASQUEZ VEGA MARILYN ELINA                  3
+    45561348     VILLEGAS CHAVEZ MIGUEL ANGEL                  3
+    18196652         ZEGARRA GONZALES ALBERTO                  3
+    42047009 PAREDES MEZA KATHERINE FORTUNATA                  3
+    47474127      ROJAS HUAMAN GISELLA SARELA                  3
+     3495147              ACUÑA SANCHEZ JACOB                  2
+
+Distribución de actividades:
+         actividad  cantidad
+             LOGIN        36
+GUARDAR FORMULARIO        19
+     SEGUNDO PLANO         2
