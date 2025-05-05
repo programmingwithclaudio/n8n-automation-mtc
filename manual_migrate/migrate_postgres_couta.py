@@ -15,7 +15,7 @@ logging.basicConfig(
 
 # Configuración de la conexión a PostgreSQL
 servidor = r"localhost"
-db = "postgres"
+db = "testdbauren"
 user = "postgres"
 password = "localpassword"
 file_path = r"C:\Users\oak\Downloads\couta.xlsx"

@@ -1,0 +1,93 @@
+# Database Connection Settings
+db:
+  host: localhost
+  port: 5432
+  database: testdbauren
+  user: postgres
+  password: localpassword
+
+# Tabla destino en la base de datos
+tabla_destino: "usuarios"
+
+# Excel File Settings
+excel:
+  path: "C:\\Users\\oak\\Downloads\\usuario.xlsx"
+
+# Columnas que se usan como clave única compuesta para identificar registros
+clave_unica: "usuario"
+clave_secundaria: "dni"
+clave_terciaria: "zonal"
+clave_cuarta: "telefono"
+
+# Archivo de log
+log_file: "C:\\Users\\oak\\ti\\manual_migrate\\carga_usuario.log"
+
+# Field Mapping (Excel Column -> Database Column)
+field_mapping:
+  Usuario: usuario
+  Empresa: empresa
+  Nombre: nombre
+  DNI: dni
+  Rol: rol
+  Poblacion: poblacion
+  Zonal: zonal
+  Email: email
+  Telefono: telefono
+  Region: region
+  Genero: genero
+  Superior: superior
+  Direccion: direccion
+  Pais: pais
+  CodigoPostal: codigo_postal
+  ZonaHoraria: zona_horaria
+  FechaIngreso: fecha_ingreso
+  FechaCese: fecha_cese
+  Estado: estado
+
+# Field Normalization Rules (specify special handling for fields)
+normalization:
+  # For fields that need special treatment
+  usuario:
+    type: document
+    min_length: 6
+    default: DESCONOCIDO
+  dni:
+    type: document
+    min_length: 8
+    default: DESCONOCIDO
+  email:
+    type: email
+    validation: true
+  telefono:
+    type: phone
+    country: PE
+    validation: true
+  fecha_ingreso:
+    type: date
+    format: '%d/%m/%Y'
+  fecha_cese:
+    type: date
+    format: '%d/%m/%Y'
+  nombre:
+    type: text
+    case: upper
+    remove_accents: true
+  empresa:
+    type: text
+    case: upper
+    remove_accents: true
+  rol:
+    type: text
+    case: upper
+  poblacion:
+    type: text
+    case: title
+  zonal:
+    type: text
+    case: upper
+  region:
+    type: text
+    case: upper
+  genero:
+    type: text
+    case: title
