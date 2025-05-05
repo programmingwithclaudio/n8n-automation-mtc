@@ -9,15 +9,15 @@ db:
 tabla_destino: "detallado"
 
 # Archivo de origen de datos
-archivo_excel: "C:\\Users\\oak\\Downloads\\Detallado04.xlsx"
-
+#archivo_excel: "C:\\Users\\oak\\Downloads\\Detallado01.xlsx"
+archivo_excel: "C:\\Users\\jimmy.atao\\Downloads\\Detallado.xlsx"
 # Columnas que se usan como clave única compuesta para identificar registros
 clave_unica: "codigo_fe"
 clave_secundaria: "dni_cliente"
 
 # Archivo de log
-log_file: "C:\\Users\\oak\\ti\\manual_migrate\\carga_incremental.log"
-
+#log_file: "C:\\Users\\oak\\ti\\manual_migrate\\carga_detallado.log"
+log_file: "C:\\Users\\jimmy.atao\\ti\\manual_migrate\\carga_detallado.log"
 # Mapeo de columnas del Excel a la base de datos
 # Si las columnas del Excel no coinciden con las de la BD, definir aquí el mapeo
 mapeo_columnas:

@@ -1,9 +1,11 @@
+version: '3.8'
 
 services:
   evolution_api_v2:
     image: atendai/evolution-api:v2.2.0
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - evolution_v2_instances:/evolution/instances
     networks:
@@ -11,44 +13,43 @@ services:
     environment:
       # Server Configuration
       - SERVER_URL=http://localhost:8080
-      #- SERVER_URL=http://evolution_api_v2:8080
+      
+      # Seguridad
       - AUTHENTICATION_API_KEY=6f452646de12e76ae1625de209d77862
       
-      # Logging Configuration
+      # Logging
       - LOG_LEVEL=DEBUG
       - LOG_COLOR=true
       
-      # Database Configuration
+      # Database (Corregido para usar configuración interna Docker)
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=evolution2
+      - DATABASE_HOST=postgres  # Nombre del servicio
+      - DATABASE_PORT=5432      # Puerto interno del contenedor
+      - DATABASE_NAME=postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=localpassword
-      - DATABASE_CONNECTION_URI=postgresql://postgres:localpassword@postgres:5432/evolution2
+      - DATABASE_CONNECTION_URI=postgresql://postgres:localpassword@postgres:5432/postgres?client_encoding=utf8  # Codificación forzada
       
-      # RabbitMQ Configuration
+      # RabbitMQ
       - RABBITMQ_ENABLED=true
-      - RABBITMQ_URI=amqp://rabbitmq:localpassword@rabbitmq:5672/default
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/  # Usar credenciales por defecto
       
-      # Development Settings
+      # Integraciones
       - WEBHOOK_GLOBAL_ENABLED=true
-      - OPENAI_ENABLED=false
       - TYPEBOT_ENABLED=true
-      - CHATWOOT_ENABLED=false
       
-      # Cache Configuration
+      # Redis
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis:6379/6
       
-      # S3 Storage Configuration
-      - S3_ENABLED=true
+      # MinIO/S3
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ENDPOINT=minio
+      - S3_PORT=9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
       - S3_BUCKET=local-bucket
-      - S3_ENDPOINT=minio
-      - S3_PORT=9000
       - S3_USE_SSL=false
     ports:
       - "8080:8080"
@@ -58,24 +59,9 @@ services:
           cpus: '1'
           memory: 1024M
 
-  # n8n:
-  #   image: docker.n8n.io/n8nio/n8n:latest
-  #   ports:
-  #     - "5678:5678"
-  #   volumes:
-  #     - n8n_data:/home/node/.n8n
-  #   environment:
-  #     - N8N_ENCRYPTION_KEY=local_dev_encryption_key
-  #     - GENERIC_TIMEZONE=America/Mexico_City
-  #     - N8N_USER=admin
-  #     - N8N_PASSWORD=local_admin_password
-  #     - N8N_RUNNERS_ENABLED=true
-  #     - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-  #   networks:
-  #     - local_network
-
   minio:
     image: minio/minio:latest
+    hostname: minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -90,8 +76,7 @@ services:
 
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
+    hostname: redis
     volumes:
       - redis_data:/data
     networks:
@@ -101,35 +86,44 @@ services:
     image: postgres:13
     ports:
       - "5432:5432"
+    hostname: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=localpassword
-      - POSTGRES_MULTIPLE_DATABASES=evolution2,chatwoot,n8n
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: postgres
+      LC_COLLATE: 'C.UTF-8'  # Forzar collate UTF-8
+      LC_CTYPE: 'C.UTF-8'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./sqlpostgres:/docker-entrypoint-initdb.d
+      #- ./sqlpostgres:/docker-entrypoint-initdb.d  # Asegurar que los scripts SQL usen UTF-8
     networks:
       - local_network
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: pgadmin
+    hostname: pgadmin
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: admin@example.com    # Correo de acceso
+      PGADMIN_DEFAULT_PASSWORD: admin             # Contraseña de acceso
+      PGADMIN_CONFIG_SERVER_MODE: "False"         # Desactiva modo servidor
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"  # Simplifica acceso en desarrollo
     ports:
-      - "5050:80"
+      - "8081:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - local_network
 
-
 volumes:
   evolution_v2_instances:
-  # n8n_data:
   minio_data:
   postgres_data:
   redis_data:

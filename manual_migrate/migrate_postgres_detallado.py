@@ -8,7 +8,7 @@ import numpy as np
 import sys
 
 # Función para cargar la configuración desde YAML
-def cargar_configuracion(archivo_config=r"manual_migrate\config.yml"):
+def cargar_configuracion(archivo_config=r"manual_migrate\config_detallado.yml"):
     """Cargar configuración desde archivo YAML"""
     try:
         if not os.path.exists(archivo_config):

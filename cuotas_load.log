@@ -1,0 +1,26 @@
+2025-05-05 10:05:11,355 - INFO - Tabla cuotas verificada o creada correctamente
+2025-05-05 10:05:11,755 - INFO - Archivo Excel cargado correctamente: C:\Users\jimmy.atao\Downloads\couta.xlsx, hoja: Tabla1
+2025-05-05 10:05:11,771 - INFO - Dimensiones originales del Excel: (299, 4)
+2025-05-05 10:05:11,788 - INFO - Preprocesamiento de datos completado
+2025-05-05 10:05:11,795 - INFO - Dimensiones después del preprocesamiento: (299, 5)
+2025-05-05 10:05:12,042 - INFO - Se insertaron 299 nuevos registros
+2025-05-05 10:05:12,084 - INFO - No hay registros para actualizar
+2025-05-05 10:05:12,145 - INFO - Reporte de cuotas generado correctamente
+2025-05-05 10:05:12,145 - INFO - Proceso de carga incremental completado exitosamente
+2025-05-05 11:23:25,029 - INFO - Tabla cuotas verificada o creada correctamente
+2025-05-05 11:23:25,282 - INFO - Archivo Excel cargado correctamente: C:\Users\jimmy.atao\Downloads\couta.xlsx, hoja: Tabla1
+2025-05-05 11:23:25,287 - INFO - Dimensiones originales del Excel: (311, 4)
+2025-05-05 11:23:25,303 - INFO - Preprocesamiento de datos completado
+2025-05-05 11:23:25,308 - INFO - Dimensiones después del preprocesamiento: (311, 5)
+2025-05-05 11:23:25,334 - INFO - Se insertaron 12 nuevos registros
+2025-05-05 11:23:25,358 - INFO - No hay registros para actualizar
+2025-05-05 11:23:25,383 - INFO - Reporte de cuotas generado correctamente
+2025-05-05 11:23:25,383 - INFO - Proceso de carga incremental completado exitosamente
+2025-05-05 18:14:46,295 - INFO - Tabla cuotas verificada o creada correctamente
+2025-05-05 18:14:46,520 - INFO - Archivo Excel cargado correctamente: C:\Users\jimmy.atao\Downloads\couta.xlsx, hoja: Tabla1
+2025-05-05 18:14:46,525 - INFO - Dimensiones originales del Excel: (311, 4)
+2025-05-05 18:14:46,537 - INFO - Preprocesamiento de datos completado
+2025-05-05 18:14:46,542 - INFO - Dimensiones después del preprocesamiento: (311, 5)
+2025-05-05 18:14:46,552 - INFO - No hay nuevos registros para cargar
+2025-05-05 18:14:46,579 - INFO - No hay registros para actualizar
+2025-05-05 18:14:46,583 - INFO - Proceso de carga incremental completado exitosamente

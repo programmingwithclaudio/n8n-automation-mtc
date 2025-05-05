@@ -59,9 +59,11 @@ ORDER BY
   ua.nombre, c.fecha;
 
 
--- necesitos una tabla general que combine las tres para realizar una nalsisis especializado como expertors pleae
- """
- actividades
+-- necesitos una tabla general que combine las tres para realizar una analisis especializado como expertos please 
+-- las tres tablas conectan como podemos revisar la conexcion entre UsuariosAjustados query y detalles de detallado tinene campos muy valiosso respecto el campo fijas
+--  
+"""
+actividades
 id	fecha	nombre_usuario	dni_vendedor	superior	actividad	detalle	motivo	zonas_asignadas	alertas	latitud	longitud	zona	estado_carga	fecha_carga	hash_id	fecha_actualizacion
 1	01/05/2025 23:04	TEJADA TACO REYNALDO VIDAL	48125976	HUANCA CONDORI ANGEL DANIEL	LOGIN	NONE	None	SRG494	Login realizado fuera de horario,Login realizado fuera de zona asignada.	-16.426613	-71.51121	A4R019	nuevo	42:56.3	1a1980f3c2b269366a99f14f1941b3f8	42:56.3
 2	01/05/2025 22:59	TEJADA TACO REYNALDO VIDAL	48125976	HUANCA CONDORI ANGEL DANIEL	GUARDAR FORMULARIO	VENTA FIJA	None	SRG494	None	-16.426586	-71.511238	A4R019	nuevo	42:56.3	15a5c7368c9d20935be13d6ae17f9e3b	42:56.3
@@ -96,3 +98,64 @@ id	codigo_fe	usuario	supervisor	region	zonal	dni_vendedor	formulario	cliente	fec
 
  
  """
+
+CREATE OR REPLACE VIEW vista_actividad_usuarios AS
+WITH Calendar AS (
+  SELECT
+    (generate_series(
+       '2025-05-01'::date,
+       '2025-05-03'::date,
+       '1 day'
+     ))::date AS fecha
+),
+UsuariosAjustados AS (
+  SELECT
+    LEFT(u.dni, 8) AS dni,
+    u.nombre,
+    CASE WHEN u.zonal LIKE 'LIMA%' THEN 'LIMA' ELSE u.zonal END AS zonal_principal,
+    CASE 
+      WHEN u.dni IN ('41455870','42047009','46862391','48306579','70258803','72807335','75947227')
+        THEN 'GOMEZ PALZA CAROLINA MERCEDES'
+      ELSE u.superior
+    END AS superior_ajustado,
+    CASE 
+      WHEN u.superior = 'GOMEZ PALZA CAROLINA MERCEDES' THEN 'MOQUEHUA'
+      ELSE u.zonal
+    END AS zonal_ajustado,
+    u.estado,
+    regexp_replace(u.rol, '^.* - ', '') AS rol
+  FROM usuarios u
+  WHERE u.rol ILIKE '%vendedor%'
+    AND u.estado = 'En campo'
+)
+SELECT
+  c.fecha,
+  ua.dni,
+  ua.nombre,
+  ua.zonal_ajustado AS zonal,
+  ua.superior_ajustado AS supervisor,
+  ua.estado,
+  ua.rol,
+  1 AS hc,
+  MAX(CASE WHEN a.actividad = 'LOGIN' THEN 1 ELSE 0 END) AS login,
+  MAX(CASE WHEN a.actividad = 'PRESENCIA HUELLERO' THEN 1 ELSE 0 END) AS asisth,
+  MAX(CASE WHEN a.detalle = 'VENTA FIJA' THEN 1 ELSE 0 END) AS hc_c_vta,
+  COUNT(CASE WHEN a.detalle = 'VENTA FIJA' THEN 1 END) AS ventas,
+  COALESCE(cu.valor, 0) AS couta
+FROM Calendar c
+CROSS JOIN UsuariosAjustados ua
+LEFT JOIN actividades a
+  ON ua.dni = a.dni_vendedor
+  AND a.fecha::date = c.fecha
+LEFT JOIN cuotas cu
+  ON cu.supervisor = ua.superior_ajustado
+  AND cu.fecha = (
+    SELECT MAX(q2.fecha)
+    FROM cuotas q2
+    WHERE q2.supervisor = ua.superior_ajustado
+      AND date_trunc('month', q2.fecha) = date_trunc('month', c.fecha)
+  )
+GROUP BY
+  c.fecha, ua.dni, ua.nombre, ua.zonal_ajustado, ua.superior_ajustado, ua.estado, ua.rol, cu.valor
+ORDER BY
+  ua.nombre, c.fecha;

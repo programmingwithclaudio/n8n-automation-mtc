@@ -58,3 +58,122 @@
 2025-05-04 15:44:54,813 - INFO - Obtenidos 16193 registros existentes para comparación
 2025-05-04 15:44:54,906 - INFO - Nuevos registros insertados: 32
 2025-05-04 15:44:54,938 - INFO - Proceso completado exitosamente. Nuevos: 32, Actualizados: 0
+2025-05-05 10:06:32,342 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:06:32,431 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:06:32,543 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:06:32,593 - ERROR - El archivo C:\Users\oak\Downloads\Actividad01.xlsx no existe.
+2025-05-05 10:07:14,235 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:07:14,301 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:07:14,343 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:07:14,641 - INFO - Datos cargados del Excel: 57 filas
+2025-05-05 10:07:14,695 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 10:07:14,698 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 10:07:14,716 - INFO - Preprocesamiento completado. Registros: 57
+2025-05-05 10:07:14,753 - INFO - Obtenidos 0 registros existentes para comparación
+2025-05-05 10:07:14,753 - INFO - No hay registros existentes. Insertando todos como nuevos.
+2025-05-05 10:07:14,886 - INFO - Proceso completado exitosamente. Nuevos: 57, Actualizados: 0
+2025-05-05 10:07:22,849 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:07:22,926 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:07:22,930 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:07:23,828 - INFO - Datos cargados del Excel: 8439 filas
+2025-05-05 10:07:23,840 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 10:07:23,848 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 10:07:24,234 - INFO - Preprocesamiento completado. Registros: 8439
+2025-05-05 10:07:24,259 - INFO - Obtenidos 57 registros existentes para comparación
+2025-05-05 10:07:27,192 - INFO - Nuevos registros insertados: 8439
+2025-05-05 10:07:27,212 - INFO - Proceso completado exitosamente. Nuevos: 8439, Actualizados: 0
+2025-05-05 10:07:40,886 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:07:40,950 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:07:40,954 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:07:41,818 - INFO - Datos cargados del Excel: 7697 filas
+2025-05-05 10:07:41,829 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 10:07:41,837 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 10:07:42,195 - INFO - Preprocesamiento completado. Registros: 7697
+2025-05-05 10:07:42,314 - INFO - Obtenidos 8496 registros existentes para comparación
+2025-05-05 10:07:44,967 - INFO - Nuevos registros insertados: 7697
+2025-05-05 10:07:44,984 - INFO - Proceso completado exitosamente. Nuevos: 7697, Actualizados: 0
+2025-05-05 10:07:50,278 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:07:50,350 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:07:50,353 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:07:50,576 - INFO - Datos cargados del Excel: 53 filas
+2025-05-05 10:07:50,587 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 10:07:50,590 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 10:07:50,599 - INFO - Preprocesamiento completado. Registros: 53
+2025-05-05 10:07:50,761 - INFO - Obtenidos 16193 registros existentes para comparación
+2025-05-05 10:07:50,837 - INFO - Nuevos registros insertados: 53
+2025-05-05 10:07:50,862 - INFO - Proceso completado exitosamente. Nuevos: 53, Actualizados: 0
+2025-05-05 10:08:09,185 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 10:08:09,250 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 10:08:09,253 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 10:08:09,613 - INFO - Datos cargados del Excel: 1147 filas
+2025-05-05 10:08:09,625 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 10:08:09,629 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 10:08:09,689 - INFO - Preprocesamiento completado. Registros: 1147
+2025-05-05 10:08:09,871 - INFO - Obtenidos 16246 registros existentes para comparación
+2025-05-05 10:08:10,328 - INFO - Nuevos registros insertados: 1147
+2025-05-05 10:08:10,350 - INFO - Proceso completado exitosamente. Nuevos: 1147, Actualizados: 0
+2025-05-05 11:07:13,766 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 11:07:13,951 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 11:07:13,954 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 11:07:14,695 - INFO - Datos cargados del Excel: 2433 filas
+2025-05-05 11:07:14,737 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 11:07:14,743 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 11:07:14,882 - INFO - Preprocesamiento completado. Registros: 2433
+2025-05-05 11:07:15,078 - INFO - Obtenidos 17393 registros existentes para comparación
+2025-05-05 11:07:15,660 - INFO - Nuevos registros insertados: 1286
+2025-05-05 11:07:16,328 - INFO - Registros actualizados con cambios: 36
+2025-05-05 11:07:16,372 - INFO - Proceso completado exitosamente. Nuevos: 1286, Actualizados: 36
+2025-05-05 12:36:07,376 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 12:36:07,593 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 12:36:07,619 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 12:36:08,381 - INFO - Datos cargados del Excel: 4050 filas
+2025-05-05 12:36:08,409 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 12:36:08,416 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 12:36:08,617 - INFO - Preprocesamiento completado. Registros: 4050
+2025-05-05 12:36:08,954 - INFO - Obtenidos 18679 registros existentes para comparación
+2025-05-05 12:36:10,162 - INFO - Nuevos registros insertados: 1617
+2025-05-05 12:36:11,468 - INFO - Registros actualizados con cambios: 5
+2025-05-05 12:36:11,511 - INFO - Proceso completado exitosamente. Nuevos: 1617, Actualizados: 5
+2025-05-05 14:01:15,009 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 14:01:15,402 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 14:01:15,418 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 14:01:17,511 - INFO - Datos cargados del Excel: 4837 filas
+2025-05-05 14:01:17,548 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 14:01:17,555 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 14:01:17,789 - INFO - Preprocesamiento completado. Registros: 4837
+2025-05-05 14:01:18,391 - INFO - Obtenidos 20296 registros existentes para comparación
+2025-05-05 14:01:18,819 - INFO - Nuevos registros insertados: 787
+2025-05-05 14:01:21,077 - INFO - Registros actualizados con cambios: 28
+2025-05-05 14:01:21,122 - INFO - Proceso completado exitosamente. Nuevos: 787, Actualizados: 28
+2025-05-05 14:15:24,409 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 14:15:24,591 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 14:15:24,598 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 14:15:25,335 - INFO - Datos cargados del Excel: 4837 filas
+2025-05-05 14:15:25,358 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 14:15:25,368 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 14:15:25,611 - INFO - Preprocesamiento completado. Registros: 4837
+2025-05-05 14:15:26,033 - INFO - Obtenidos 21083 registros existentes para comparación
+2025-05-05 14:15:28,677 - INFO - Registros actualizados con cambios: 14
+2025-05-05 14:15:28,721 - INFO - Proceso completado exitosamente. Nuevos: 0, Actualizados: 14
+2025-05-05 16:08:10,767 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 16:08:11,040 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 16:08:11,078 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 16:08:12,185 - INFO - Datos cargados del Excel: 6584 filas
+2025-05-05 16:08:12,218 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 16:08:12,227 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 16:08:12,541 - INFO - Preprocesamiento completado. Registros: 6584
+2025-05-05 16:08:12,922 - INFO - Obtenidos 21083 registros existentes para comparación
+2025-05-05 16:08:13,917 - INFO - Nuevos registros insertados: 1747
+2025-05-05 16:08:16,979 - INFO - Registros actualizados con cambios: 433
+2025-05-05 16:08:17,030 - INFO - Proceso completado exitosamente. Nuevos: 1747, Actualizados: 433
+2025-05-05 18:14:25,695 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-05 18:14:25,924 - INFO - Conexión exitosa a PostgreSQL
+2025-05-05 18:14:25,950 - INFO - Tablas verificadas o creadas correctamente
+2025-05-05 18:14:27,150 - INFO - Datos cargados del Excel: 8596 filas
+2025-05-05 18:14:27,186 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-05 18:14:27,196 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-05 18:14:27,616 - INFO - Preprocesamiento completado. Registros: 8596
+2025-05-05 18:14:28,189 - INFO - Obtenidos 22830 registros existentes para comparación
+2025-05-05 18:14:29,104 - INFO - Nuevos registros insertados: 2012
+2025-05-05 18:14:32,481 - INFO - Registros actualizados con cambios: 21
+2025-05-05 18:14:32,530 - INFO - Proceso completado exitosamente. Nuevos: 2012, Actualizados: 21

@@ -27,7 +27,8 @@ DB_CONFIG = {
     "user": "postgres",
     "password": "localpassword"
 }
-FILE_PATH = r"C:\Users\oak\Downloads\Actividad04.xlsx"
+#FILE_PATH = r"C:\Users\oak\Downloads\Actividad01.xlsx"
+FILE_PATH = r"C:\Users\jimmy.atao\Downloads\Actividad.xlsx"
 
 def verify_connection(config):
     """Verifica la conexión a la base de datos"""
