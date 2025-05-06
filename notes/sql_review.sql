@@ -119,7 +119,7 @@ UsuariosAjustados AS (
       ELSE u.superior
     END AS superior_ajustado,
     CASE 
-      WHEN u.superior = 'GOMEZ PALZA CAROLINA MERCEDES' THEN 'MOQUEHUA'
+      WHEN u.superior = 'GOMEZ PALZA CAROLINA MERCEDES' THEN 'ILO'
       ELSE u.zonal
     END AS zonal_ajustado,
     u.estado,
