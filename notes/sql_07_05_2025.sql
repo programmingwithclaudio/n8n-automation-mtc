@@ -34,7 +34,13 @@ WITH
       u.rol ILIKE '%vendedor%'
       AND u.estado = 'En campo'
       AND u.fecha_proceso = CURRENT_DATE
-      AND u.nombre <> 'BECERRA ACHATA SERGIO RENATO'
+      -- Excluir vendedores específicos
+      AND u.nombre NOT ILIKE ANY (ARRAY[
+        'BECERRA ACHATA SERGIO RENATO',
+        'PAIVA ZARATE ALDO WILLIAMS'
+      ])
+      -- Excluir si el supervisor es el usuario indeseado
+      AND u.superior NOT ILIKE 'PAIVA ZARATE ALDO WILLIAMS'
   )
 
 SELECT
@@ -47,14 +53,14 @@ SELECT
   ua.rol,
   1 AS hc,
   MAX(CASE WHEN a.actividad = 'LOGIN' THEN 1 ELSE 0 END) AS login,
-  MAX(CASE WHEN a.actividad = 'PRESENCIA HUELLERO' THEN 1 ELSE 0 END) AS asisth,
+  MAX(CASE WHEN a.actividad = 'PRESENCIA HUELLERO' THEN 1 ELSE 0 END) AS huellero,
   MAX(CASE WHEN a.detalle = 'VENTA FIJA' THEN 1 ELSE 0 END) AS hc_c_vta,
   COUNT(CASE WHEN a.detalle = 'VENTA FIJA' THEN 1 END) AS ventas,
   COALESCE(cu.valor, 0) AS couta
 FROM Calendar c
 CROSS JOIN UsuariosAjustados ua
 LEFT JOIN actividades a
-  ON ltrim(ua.dni, '0') = a.dni_vendedor  -- Eliminamos ceros a la izquierda para coincidir
+  ON ltrim(ua.dni, '0') = a.dni_vendedor
   AND a.fecha::date = c.fecha
 LEFT JOIN cuotas cu
   ON cu.supervisor = ua.superior_ajustado
@@ -77,6 +83,7 @@ GROUP BY
 ORDER BY
   ua.nombre,
   c.fecha;
+
 
 
  -- VENTAS REPORTE FIJAS POR SUPERVISOR
