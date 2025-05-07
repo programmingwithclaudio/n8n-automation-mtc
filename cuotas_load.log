@@ -24,3 +24,12 @@
 2025-05-05 18:14:46,552 - INFO - No hay nuevos registros para cargar
 2025-05-05 18:14:46,579 - INFO - No hay registros para actualizar
 2025-05-05 18:14:46,583 - INFO - Proceso de carga incremental completado exitosamente
+2025-05-07 02:35:19,798 - INFO - Tabla cuotas verificada o creada correctamente
+2025-05-07 02:35:20,120 - INFO - Archivo Excel cargado correctamente: C:\Users\oak\Downloads\couta.xlsx, hoja: Tabla1
+2025-05-07 02:35:20,134 - INFO - Dimensiones originales del Excel: (189, 4)
+2025-05-07 02:35:20,150 - INFO - Preprocesamiento de datos completado
+2025-05-07 02:35:20,157 - INFO - Dimensiones después del preprocesamiento: (189, 5)
+2025-05-07 02:35:20,248 - INFO - Se insertaron 90 nuevos registros
+2025-05-07 02:35:20,272 - INFO - No hay registros para actualizar
+2025-05-07 02:35:20,312 - INFO - Reporte de cuotas generado correctamente
+2025-05-07 02:35:20,312 - INFO - Proceso de carga incremental completado exitosamente

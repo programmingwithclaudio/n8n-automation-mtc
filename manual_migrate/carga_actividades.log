@@ -300,3 +300,23 @@ connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection re
 2025-05-06 17:31:55,110 - INFO - Obtenidos 33118 registros existentes para comparación
 2025-05-06 17:32:00,331 - INFO - Registros actualizados con cambios: 19
 2025-05-06 17:32:00,386 - INFO - Proceso completado exitosamente. Nuevos: 0, Actualizados: 19
+2025-05-07 02:19:34,410 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-07 02:19:34,717 - INFO - Conexión exitosa a PostgreSQL
+2025-05-07 02:19:34,725 - INFO - Tablas verificadas o creadas correctamente
+2025-05-07 02:19:36,108 - INFO - Datos cargados del Excel: 9226 filas
+2025-05-07 02:19:36,136 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-07 02:19:36,150 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-07 02:19:36,724 - INFO - Preprocesamiento completado. Registros: 9226
+2025-05-07 02:19:37,013 - INFO - Obtenidos 16225 registros existentes para comparación
+2025-05-07 02:19:40,783 - INFO - Nuevos registros insertados: 9226
+2025-05-07 02:19:40,819 - INFO - Proceso completado exitosamente. Nuevos: 9226, Actualizados: 0
+2025-05-07 02:19:51,754 - INFO - Iniciando proceso de carga y actualización de datos
+2025-05-07 02:19:51,843 - INFO - Conexión exitosa a PostgreSQL
+2025-05-07 02:19:51,848 - INFO - Tablas verificadas o creadas correctamente
+2025-05-07 02:19:53,184 - INFO - Datos cargados del Excel: 9359 filas
+2025-05-07 02:19:53,208 - INFO - Columnas originales del Excel: ['Fecha', 'Nombre Usuario', 'DNI Vendedor', 'Superior', 'Actividad', 'Detalle', 'Motivo', 'Zonas Asignadas', 'Alertas', 'Latitud', 'Longitud', 'Zona']
+2025-05-07 02:19:53,230 - INFO - Columnas después de renombrar: ['fecha', 'nombre_usuario', 'dni_vendedor', 'superior', 'actividad', 'detalle', 'motivo', 'zonas_asignadas', 'alertas', 'latitud', 'longitud', 'zona']
+2025-05-07 02:19:53,784 - INFO - Preprocesamiento completado. Registros: 9359
+2025-05-07 02:19:54,174 - INFO - Obtenidos 25451 registros existentes para comparación
+2025-05-07 02:19:58,113 - INFO - Nuevos registros insertados: 9359
+2025-05-07 02:19:58,154 - INFO - Proceso completado exitosamente. Nuevos: 9359, Actualizados: 0

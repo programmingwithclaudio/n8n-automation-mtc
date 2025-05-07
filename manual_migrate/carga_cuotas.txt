@@ -1,29 +1,30 @@
 === REPORTE DE CUOTAS ===
-Total registros: 311
-Período de datos: 2025-05-01 a 2025-05-12
-Total zonales: 7
-Total supervisores: 26
-Valor total de cuotas: 2624
+Total registros: 189
+Período de datos: 2025-05-01 a 2025-05-08
+Total zonales: 8
+Total supervisores: 30
+Valor total de cuotas: 1787
 
 Distribución por zonales:
-   zonal  cantidad  valor_total  valor_promedio
-AREQUIPA       108          892        8.259259
-CHIMBOTE        59          588        9.966102
-  HUARAZ        36          384       10.666667
-   TACNA        36          260        7.222222
-TRUJILLO        24          252       10.500000
-    LIMA        24          128        5.333333
-     ILO        24          120        5.000000
+     zonal  cantidad  valor_total  valor_promedio
+  AREQUIPA        59          561        9.508475
+  CHIMBOTE        34          408       12.000000
+    HUARAZ        27          312       11.555556
+  TRUJILLO        14          161       11.500000
+     TACNA        21          161        7.666667
+      LIMA        14           84        6.000000
+       ILO        14           70        5.000000
+LIMA NORTE         6           30        5.000000
 
 Top 10 supervisores por valor total:
                          supervisor    zonal  valor_total
-    ZARRAGA HENRIQUEZ SIMON ENRIQUE AREQUIPA          144
-        CACERES MARTINEZ JULIO RAUL AREQUIPA          136
-ALBERTO HENOSTROZA LILIANA ARACELLI   HUARAZ          128
-       GIRALDO LOPEZ RIVALDO ANDRES   HUARAZ          128
-   GUTIERREZ BENITES OSCAR PATRICIO TRUJILLO          128
-        RAMOS JARA FAUSTO ADALBERTO CHIMBOTE          128
-GONZALES GUTIERREZ ALEXANDER ISMAEL CHIMBOTE          128
-         PAIVA ZARATE ALDO WILLIAMS   HUARAZ          128
-        ORDINOLA MEJIA JOHAN XAVIER CHIMBOTE          128
-        HUANCA CONDORI ANGEL DANIEL AREQUIPA          128
+    ZARRAGA HENRIQUEZ SIMON ENRIQUE AREQUIPA          112
+        CACERES MARTINEZ JULIO RAUL AREQUIPA           98
+ALBERTO HENOSTROZA LILIANA ARACELLI   HUARAZ           84
+        RAMOS JARA FAUSTO ADALBERTO CHIMBOTE           84
+   GUTIERREZ BENITES OSCAR PATRICIO TRUJILLO           84
+GONZALES GUTIERREZ ALEXANDER ISMAEL CHIMBOTE           84
+        ORDINOLA MEJIA JOHAN XAVIER CHIMBOTE           84
+         PAIVA ZARATE ALDO WILLIAMS   HUARAZ           84
+       GIRALDO LOPEZ RIVALDO ANDRES   HUARAZ           84
+        HUANCA CONDORI ANGEL DANIEL AREQUIPA           84

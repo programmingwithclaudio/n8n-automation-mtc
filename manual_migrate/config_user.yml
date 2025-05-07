@@ -11,8 +11,8 @@ tabla_destino: "usuarios"
 
 # Excel File Settings
 excel:
-  path: "C:\\Users\\jimmy.atao\\Downloads\\usuario.xlsx"
-  #path: "C:\\Users\\oak\\Downloads\\usuario.xlsx"
+  #path: "C:\\Users\\jimmy.atao\\Downloads\\usuario.xlsx"
+  path: "C:\\Users\\oak\\Downloads\\usuario.xlsx"
 # Columnas que se usan como clave única compuesta para identificar registros
 clave_unica: "usuario"
 clave_secundaria: "dni"
@@ -20,8 +20,8 @@ clave_terciaria: "zonal"
 clave_cuarta: "telefono"
 
 # Archivo de log
-#log_file: "C:\\Users\\oak\\ti\\manual_migrate\\carga_usuario.log"
-log_file: "C:\\Users\\jimmy.atao\\ti\\manual_migrate\\carga_usuario.log"
+log_file: "C:\\Users\\oak\\ti\\manual_migrate\\carga_usuario.log"
+#log_file: "C:\\Users\\jimmy.atao\\ti\\manual_migrate\\carga_usuario.log"
 # Field Mapping (Excel Column -> Database Column)
 field_mapping:
   Usuario: usuario

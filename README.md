@@ -42,11 +42,7 @@ chmod +x sqlpostgres/01-init-databases.sh
 - Flujo de nodos e intrucciones.
 
 ```bash
-{
-  "base": "El usuario {{ $('Edit Fields').item.json.sender.name }} {{ $('Edit Fields').item.json.recipient.full_jid }} dice: '{{ $('Edit Fields').item.json.message.content }}'."
-  "contextInstructions": [
-    "Responde de forma directa, cordial y profesional sin incluir encabezados ni indicaciones de generación automática.",
-    "Proporciona solo la respuesta final en formato de texto sin etiquetas."
-  ]
-}
+docker-compose stop evolution_api_v2
+docker-compose rm -v evolution_api_v2
+docker-compose up -d evolution_api_v2
 ```

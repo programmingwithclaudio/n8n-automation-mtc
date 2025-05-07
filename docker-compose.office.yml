@@ -3,7 +3,6 @@ version: '3.8'
 services:
   evolution_api_v2:
     image: atendai/evolution-api:v2.2.0
-    container_name: evolution_api_v2
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,19 +21,19 @@ services:
       - LOG_LEVEL=DEBUG
       - LOG_COLOR=true
       
-      # Database
+      # Database (Corregido para usar configuración interna Docker)
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
+      - DATABASE_HOST=postgres  # Nombre del servicio
+      - DATABASE_PORT=5432      # Puerto interno del contenedor
       - DATABASE_NAME=postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=localpassword
-      - DATABASE_CONNECTION_URI=postgresql://postgres:localpassword@postgres:5432/postgres?client_encoding=utf8
+      - DATABASE_CONNECTION_URI=postgresql://postgres:localpassword@postgres:5432/postgres?client_encoding=utf8  # Codificación forzada
       
       # RabbitMQ
       - RABBITMQ_ENABLED=true
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/  # Usar credenciales por defecto
       
       # Integraciones
       - WEBHOOK_GLOBAL_ENABLED=true
@@ -44,7 +43,8 @@ services:
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis:6379/6
       
-      # MinIO/S3 (corregido)
+      # MinIO/S3
+      - S3_ENDPOINT=http://minio:9000
       - S3_ENDPOINT=minio
       - S3_PORT=9000
       - S3_ACCESS_KEY=minioadmin
@@ -53,7 +53,6 @@ services:
       - S3_USE_SSL=false
     ports:
       - "8080:8080"
-    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -62,7 +61,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: minio
     hostname: minio
     ports:
       - "9000:9000"
@@ -75,21 +73,17 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - local_network
-    restart: unless-stopped
 
   redis:
     image: redis:alpine
-    container_name: redis
     hostname: redis
     volumes:
       - redis_data:/data
     networks:
       - local_network
-    restart: unless-stopped
 
   postgres:
     image: postgres:13
-    container_name: postgres
     ports:
       - "5432:5432"
     hostname: postgres
@@ -102,34 +96,31 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: localpassword
       POSTGRES_DB: postgres
-      LC_COLLATE: 'C.UTF-8'
+      LC_COLLATE: 'C.UTF-8'  # Forzar collate UTF-8
       LC_CTYPE: 'C.UTF-8'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      #- ./sqlpostgres:/docker-entrypoint-initdb.d  # Asegurar que los scripts SQL usen UTF-8
     networks:
       - local_network
-    restart: unless-stopped
 
   pgadmin:
-    image: dpage/pgadmin4:6.21
-    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    hostname: pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      # Credenciales simplificadas
-      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
-      # Desactivar características que podrían causar problemas
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-      # Exponer logs para diagnóstico
-      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: 30
+      PGADMIN_DEFAULT_EMAIL: admin@example.com    # Correo de acceso
+      PGADMIN_DEFAULT_PASSWORD: admin             # Contraseña de acceso
+      PGADMIN_CONFIG_SERVER_MODE: "False"         # Desactiva modo servidor
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"  # Simplifica acceso en desarrollo
     ports:
-      - "5050:80"
-    # Montaje mínimo necesario
+      - "8081:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - local_network
-    restart: unless-stopped
 
 volumes:
   evolution_v2_instances:
@@ -137,6 +128,7 @@ volumes:
   postgres_data:
   redis_data:
   pgadmin_data:
+
 
 networks:
   local_network:
